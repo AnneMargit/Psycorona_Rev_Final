@@ -1,0 +1,614 @@
+---
+title: "Descriptive statistics including gender"
+author: "Anne Margit"
+date: "4/25/2021"
+output: github_document
+---
+
+> Including all gender categories
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, results = "hide"}
+load("data_imputed_emomeans_maxweeksg.Rdata")
+load("data_long_min3_gstr_age.Rdata")
+```
+
+This dataset includes:
+
+1. Data from all weekly measurement waves (baseline through wave 11, Time 1 through 12) 
+2. Participants who provided at least 3 measurements 
+3. Participants who are residents of the country they currently live in
+4. Participants who provided info on age
+5. Participants who provided info on gender (either male or female)
+6. Data from countries with at least 20 participants
+7. Pooled age groups
+8. Imputed missing emotion scores
+9. Combined emotion scores (NAA, NAD, PAA, PAD)
+10. An imputed Stringency index (StringencyIndex_imp) 
+11. A variable indicating the number of days before and after the day on which maximum stringency was reached for the respective country (DaysMax)
+12. A variable indicating the number of weeks before and after the day on which maximum stringency was reached for the respective country (WeeksMax)
+13. A variable indicating the date on which maximum Stringency was reached for that country (DateMaxStr)
+
+```{r, message=F}
+library(dplyr)
+library(tidyverse)
+library(stringr)
+library(papaja)
+library(ggpubr)
+library(ggplot2)
+library(stargazer)
+```
+
+# Missing data
+```{r, results = "hide", message=F}
+#Missing data
+missing.values <- data_imputed_emomeans_maxweeksg %>%
+  gather(key = "key", value = "val") %>%
+  dplyr::mutate(is.missing = is.na(val)) %>%
+  dplyr::group_by(key, is.missing) %>%
+  dplyr::summarise(num.missing = n()) %>%
+  dplyr::filter(is.missing==T) %>%
+  dplyr::select(-is.missing) %>%
+  dplyr::arrange(desc(num.missing))
+
+```
+
+```{r}
+apa_table(missing.values, caption="Missing data")
+```
+
+# Participants
+**Number of participants per country with original data**
+```{r, results = "hide", message=F}
+data_long_min3_gstr_age$Country <- as.factor(data_long_min3_gstr_age$Country)
+
+Country_N <- data_long_min3_gstr_age %>%
+  filter(Time == "1") %>%
+  group_by(Country) %>%
+  summarise(NCountry = n())
+```
+
+```{r}
+apa_table(Country_N, caption = "Number of participants per country on baseline")
+```
+
+**Mean number of participants per country, SD, min and max**
+```{r, results = "hide", message=F}
+CountryN <- data_long_min3_gstr_age %>%
+  group_by(Time, Country) %>%
+  filter(Nmiss <9) %>%
+  summarise(Ncountry = n_distinct(ID))
+
+CountryNdistinct <- data_long_min3_gstr_age %>%
+  group_by(Time) %>%
+  filter(Nmiss <9) %>%
+  summarise(Ncountry = n_distinct(Country))
+
+CountryMean <- CountryN %>%
+  group_by(Time) %>%
+  summarise(MCountry = mean(Ncountry), SDCountry = sd(Ncountry)) %>%
+  mutate(across(2:3, round, 2)) 
+```
+
+```{r}
+CountryMean <- as.matrix(CountryMean)
+
+stargazer(CountryMean,
+type="html", df = TRUE, out="CountryMean.doc",  single.row=TRUE, digits = 2, flip = TRUE, align = TRUE)
+```
+
+```{r}
+apa_table(CountryMean, caption = "Mean number of participants per country on baseline")
+```
+
+# Measurements
+
+**Number of participants and measurements per wave with original data**
+Create new variable that indicates sum of missings:
+```{r, results='hide', message=F}
+data_long_min3_gstr_age <- data_long_min3_gstr_age %>%
+  group_by(ID, Time) %>%
+mutate(Nmiss = sum(is.na(Ang)) + sum(is.na(Anxiety)) + sum(is.na(Nerv)) + sum(is.na(Depr)) + sum(is.na(Exh)) + 
+               sum(is.na(Energ)) + sum(is.na(Insp)) + sum(is.na(Calm)) + sum(is.na(Rel))) %>%
+  ungroup()
+```
+
+```{r, results = "hide", message=F}
+data_long_min3_gstr_age$Time <- as.factor(data_long_min3_gstr_age$Time)
+
+Wave_N_original <- data_long_min3_gstr_age %>% 
+group_by(Time)%>%
+summarise(NParticipants = n_distinct(ID[Nmiss<9]), NWave = sum (!is.na(Date)), NAng= sum(!is.na(Ang)), NAnx= sum(!is.na(Anxiety)), NNerv= sum(!is.na(Nerv)), NDepr= sum(!is.na(Depr)), NExh= sum(!is.na(Exh)), NEnerg= sum(!is.na(Energ)),  NInsp= sum(!is.na(Insp)), NCalm= sum(!is.na(Calm)), NRel= sum(!is.na(Rel)), NStr = sum(!is.na(StringencyIndex)))
+```
+
+```{r}
+apa_table(Wave_N_original, caption="Number of measurements per wave original data")
+```
+
+```{r}
+Wave_N_original <- as.matrix(Wave_N_original)
+
+stargazer(Wave_N_original,
+type="html", df = TRUE, out="Wave_N_original.doc",  single.row=TRUE, flip = TRUE, align = TRUE)
+```
+
+Mean number of assessments per participant
+```{r}
+pp_numbers <- data_long_min3_gstr_age  %>% 
+ group_by(ID)%>%
+  summarise(n_count = n_distinct(Date))
+
+mean(pp_numbers$n_count)
+sd(pp_numbers$n_count)
+```
+
+**Number of participants and measurements per wave with imputed data**
+```{r, results = "hide", message=F}
+data_imputed_emomeans_maxweeksg$Time <- as.factor(data_imputed_emomeans_maxweeksg$Time)
+
+Wave_N_imp <- data_imputed_emomeans_maxweeksg %>% 
+group_by(Time)%>%
+summarise(NParticipants = n_distinct(ID[Nmiss<9]), NWave = sum (!is.na(Date)), NAng= sum(!is.na(Ang)), NAnx= sum(!is.na(Anxiety)), NNerv= sum(!is.na(Nerv)), NDepr= sum(!is.na(Depr)), NExh= sum(!is.na(Exh)), NEnerg= sum(!is.na(Energ)),  NInsp= sum(!is.na(Insp)), NCalm= sum(!is.na(Calm)), NRel= sum(!is.na(Rel)), NStr = sum(!is.na(StringencyIndex)))
+```
+
+```{r}
+apa_table(Wave_N_imp, caption="Number of measurements per wave imputed data")
+```
+
+# Age
+**Number of participants per age group on baseline**
+```{r, results = "hide", message=F}
+data_long_min3_gstr_age$Age <- as.factor(data_long_min3_gstr_age$Age)
+
+Age_N <- data_long_min3_gstr_age %>%
+  filter(Time=="1" & Nmiss <9) %>%
+  group_by(Age) %>%
+  summarise(NAge = n())
+```
+
+```{r}
+apa_table(Age_N, caption="Number of participants per age group on baseline with original data")
+```
+
+**Number of participants per pooled age group**
+```{r, results = "hide", message=F}
+data_long_min3_gstr_age$Age_new <- as.factor(data_long_min3_gstr_age$Age_new)
+
+Age_New <- data_long_min3_gstr_age %>%
+  group_by(Time, Age_new) %>%
+  filter(Nmiss <9) %>%
+  summarise(NAge = n())
+```
+
+```{r}
+apa_table(Age_New, caption="Number of participants per pooled age group on baseline with original data")
+```
+
+```{r}
+Age_New <- as.matrix(Age_New)
+
+stargazer(Age_New,
+type="html", df = TRUE, out="Age_New.doc",  single.row=TRUE, digits = 2, align = TRUE)
+```
+
+**Number of males and females on baseline**  
+```{r, results = "hide", message=F}
+Gender_N <- data_long_min3_gstr_age %>%
+  filter(Time == "1" & Nmiss <9) %>%
+  group_by(Gender) %>%
+  count(Gender)
+```
+
+```{r}
+apa_table(Gender_N, caption="Number of males and females on baseline with original data", note= "Gender 0= male; 1= female")
+```
+
+**Number of males and females per wave with original data**     
+```{r, results = "hide", message=F}
+Gender_Wave <- data_long_min3_gstr_age %>%
+  group_by(Time, Gender) %>%
+    filter(Nmiss <9) %>%
+  summarize(nGender = n_distinct(ID))
+```
+
+```{r}
+apa_table(Gender_Wave, caption="Number of males and females per wave", note= "Gender 0= male; 1= female")
+```
+
+```{r}
+Gender_Wave <- as.matrix(Gender_Wave)
+
+stargazer(Gender_Wave,
+type="html", df = TRUE, out="Gender_Wave.doc",  single.row=TRUE, digits = 2, flip = TRUE, align = TRUE)
+```
+
+**Number of males and females per pooled age group on baseline with original data**
+```{r, results = "hide", message=F}
+Age_New_Gender <- data_long_min3_gstr_age %>%
+  filter(Time == "1") %>%
+  select(Age_new, Gender) %>%
+  group_by(Age_new, Gender) %>%
+  count(Gender)
+```
+ 
+```{r}
+apa_table(Age_New_Gender, caption = "Number of males and females per pooled age group on baseline",
+          note= "Age 0= 18-24; 1= 25-44; 2= 45-64; 3= 65+, Gender 0= male; 1= female")
+```
+
+# StringencyIndex
+**Mean and SD, minimum and maximum of Stringency Index and imputed Stringency Index per country**
+```{r, results = "hide", message=F}
+StringencySummary <- data_long_min3_gstr_age %>%
+  group_by(Country)%>%
+  summarize(Str_mean = mean(StringencyIndex, na.rm=TRUE), Str_SD = sd(StringencyIndex, na.rm=TRUE), 
+            Str_max = max(StringencyIndex, na.rm=TRUE), Str_min = min(StringencyIndex, na.rm=TRUE),
+            Str_imp_mean = mean(StringencyIndex_imp, na.rm=TRUE), Str_imp_SD = sd(StringencyIndex_imp, na.rm=TRUE), 
+            Str_imp_max = max(StringencyIndex_imp, na.rm=TRUE), Str_imp_min = min(StringencyIndex_imp, na.rm=TRUE))
+```
+
+```{r}
+apa_table(StringencySummary, caption="Stringency Index per country with original data")
+```
+
+**Mean and SD, minimum and maximum of Stringency Index per wave**
+```{r, results = "hide", message=F}
+StringencySummary2 <- data_long_min3_gstr_age %>%
+  group_by(Time)%>%
+  filter(Nmiss <9)%>%
+  summarize(Str_mean = mean(StringencyIndex, na.rm=TRUE), Str_SD = sd(StringencyIndex, na.rm=TRUE), 
+            Str_max = max(StringencyIndex, na.rm=TRUE), Str_min = min(StringencyIndex, na.rm=TRUE)) %>%
+  mutate(across(2:5, round, 2))
+```
+
+```{r}
+apa_table(StringencySummary2, caption="Stringency Index per wave with original data")
+```
+
+```{r}
+StringencySummary2 <- as.matrix(StringencySummary2)
+
+stargazer(StringencySummary2,
+type="html", df = TRUE, out="StringencySummary2.doc",  single.row=TRUE, digits = 2, flip = TRUE, align = TRUE)
+```
+
+
+**Stringency Index violin plots**
+```{r, results = "hide", message=F, warning=F}
+data_imputed_emomeans_maxweeksg$Country <- as.character(data_imputed_emomeans_maxweeksg$Country)
+
+data_graphs1 <- data_imputed_emomeans_maxweeksg %>%
+filter(Country == "Argentina" |  Country == "Australia" | Country == "Brazil" | Country == "Canada" | Country == "Chile" | Country == "Croatia")
+
+data_graphs2 <- data_imputed_emomeans_maxweeksg %>%
+filter(Country == "France" | Country == "Germany" | Country == "Greece" | Country == "Hungary" | Country == "Indonesia" | Country == "Italy")
+
+data_graphs3 <- data_imputed_emomeans_maxweeksg %>%
+filter(Country == "Japan" | Country == "Kazakhstan" | Country == "Kosovo" | Country == "Malaysia" | Country == "Netherlands" | Country == "Peru")
+
+data_graphs4 <- data_imputed_emomeans_maxweeksg %>%
+filter(Country == "Philippines" | Country == "Poland" | Country == "Serbia" | Country == "Romania" | Country == "Russia" | Country == "Saudi Arabia")
+
+data_graphs5 <- data_imputed_emomeans_maxweeksg %>%
+filter(Country == "Singapore" | Country == "South Africa" | Country == "South Korea" | Country == "Spain" | Country == "Turkey" | Country == "Ukraine")
+
+data_graphs6 <- data_imputed_emomeans_maxweeksg %>%
+filter(Country == "United Kingdom" | Country == "United States" | Country == "Vietnam")
+
+
+g_s1 <- ggplot(data_graphs1, aes(StringencyIndex, Country)) + geom_violin(aes(fill=factor(Country)))
+
+g_s2 <- ggplot(data_graphs2, aes(StringencyIndex, Country)) + geom_violin(aes(fill=factor(Country)))
+
+g_s3 <- ggplot(data_graphs3, aes(StringencyIndex, Country)) + geom_violin(aes(fill=factor(Country)))
+
+g_s4 <- ggplot(data_graphs4, aes(StringencyIndex, Country)) + geom_violin(aes(fill=factor(Country)))
+
+g_s5 <- ggplot(data_graphs5, aes(StringencyIndex, Country)) + geom_violin(aes(fill=factor(Country)))
+
+g_s6 <- ggplot(data_graphs6, aes(StringencyIndex, Country)) + geom_violin(aes(fill=factor(Country)))
+
+```
+
+```{r, warning=F}
+g_s1
+g_s2
+g_s3
+g_s4
+g_s5
+g_s6
+```
+
+**Stringency Index over time per country**
+```{r, results = "hide", message=F, warning=F}
+g_s7 <- ggplot(data_graphs1, aes(x=Date, y=StringencyIndex)) + geom_line(aes(colour=factor(Country)), size=1) + 
+  theme_minimal(base_size=10) +
+  labs(title= "Severity of societal restrictions from March 2020 - July 2020", x="Date",
+       y="Stringency Index") +
+  theme(legend.position="bottom") +
+  theme(legend.title = element_blank()) +
+  theme(plot.title = element_text(hjust=0.5)) +
+  expand_limits(y=c(20, 100)) +
+  scale_x_continuous(labels=c("March", "April", "May", "June", "July"))
+
+g_s8 <- ggplot(data_graphs2, aes(x=Date, y=StringencyIndex)) + geom_line(aes(colour=factor(Country)), size=1) + 
+  theme_minimal(base_size=10) +
+  labs(title= "Severity of societal restrictions from March 2020 - July 2020", x="Date",
+       y="Stringency Index") +
+  theme(legend.position="bottom") +
+  theme(legend.title = element_blank()) +
+  theme(plot.title = element_text(hjust=0.5)) +
+  expand_limits(y=c(20, 100)) +
+  scale_x_continuous(labels=c("March", "April", "May", "June", "July"))
+
+g_s9 <- ggplot(data_graphs3, aes(x=Date, y=StringencyIndex)) +
+  geom_line(aes(colour=factor(Country)), size=1) + 
+  theme_minimal(base_size=10) +
+  labs(title= "Severity of societal restrictions from March 2020 - July 2020", x="Date",
+       y="Stringency Index") +
+  theme(legend.position="bottom") +
+  theme(legend.title = element_blank()) +
+  theme(plot.title = element_text(hjust=0.5)) +
+  scale_x_continuous(labels=c("March", "April", "May", "June", "July")) +
+  expand_limits(y=c(20, 100))
+
+g_s10 <- ggplot(data_graphs4, aes(x=Date, y=StringencyIndex)) + geom_line(aes(colour=factor(Country)), size=1) +
+  theme_minimal(base_size=10) +
+  labs(title= "Severity of societal restrictions from March 2020 - July 2020", x="Date",
+       y="Stringency Index") +
+  theme(legend.position="bottom") +
+  theme(legend.title = element_blank()) +
+  theme(plot.title = element_text(hjust=0.5)) +
+  expand_limits(y=c(20, 100)) +
+  scale_x_continuous(labels=c("March", "April", "May", "June", "July"))
+
+g_s11 <- ggplot(data_graphs5, aes(x=Date, y=StringencyIndex)) +
+  geom_line(aes(colour=factor(Country)), size=1) + 
+  theme_minimal(base_size=10) +
+  labs(title= "Severity of societal restrictions from March 2020 - July 2020", x="Date",
+       y="Stringency Index") +
+  theme(legend.position="bottom") +
+  theme(legend.title = element_blank()) +
+  theme(plot.title = element_text(hjust=0.5)) +
+  expand_limits(y=c(20, 100)) +
+  scale_x_continuous(labels=c("March", "April", "May", "June", "July"))
+
+g_s12 <- ggplot(data_graphs6, aes(x=Date, y=StringencyIndex)) +
+  geom_line(aes(colour=factor(Country)), size=1) + 
+  theme_minimal(base_size=10) +
+  labs(title= "Severity of societal restrictions from March 2020 - July 2020", x="Date",
+       y="Stringency Index") +
+  theme(legend.position="bottom") +
+  theme(legend.title = element_blank()) +
+  theme(plot.title = element_text(hjust=0.5)) +
+  expand_limits(y=c(20, 100)) +
+  scale_x_continuous(labels=c("March", "April", "May", "June", "July"))
+```
+```{r, warning=F}
+g_s7
+g_s8
+g_s9
+g_s10
+g_s11
+g_s12
+```
+
+# Emotions 
+**Mean, SD, and median of emotion factor scores**
+```{r, results = "hide", message=F, warning =F}
+emomeansN <- data_imputed_emomeans_maxweeksg %>%
+  group_by(Time) %>%
+  summarise(across(NAA:PAD, .fns=list(Mean = mean, SD = sd, Median = median), na.rm=TRUE,
+                   .names="{col}_{fn}"))
+
+emomeansN <- emomeansN %>%
+  mutate(across(2:13, round, 2))
+```
+
+```{r}
+apa_table(emomeansN, caption="Mean scores of emotion factor scores per wave")
+```
+
+```{r}
+emomeansN <- as.matrix(emomeansN)
+
+stargazer(emomeansN,
+type="html", df = TRUE, out="emomeansN.doc",  single.row=TRUE, digits = 2, flip = TRUE, align = TRUE)
+```
+
+
+**Mean, SD, and median of emotion scores**
+```{r, results = "hide", message=F, warning =F}
+emorawmeansN <- data_imputed_emomeans_maxweeksg %>%
+  group_by(Time) %>%
+  summarise(across(Ang:Rel, .fns=list(Mean = mean, SD = sd, Median = median), na.rm=TRUE,
+                   .names="{col}_{fn}"))
+```
+
+```{r}
+apa_table(emorawmeansN, caption="Mean scores of emotion scores per wave")
+```
+
+**Boxplots of emotion factor scores across time**
+```{r, results = "hide", message=F, warning=F}
+theme_set(theme_classic())
+
+gb_NAA <- ggplot(data_imputed_emomeans_maxweeksg, aes(Age_new, NAA)) + geom_boxplot(varwidth=T, aes(fill= Age_new)) + scale_fill_discrete(name="Age", labels = c("18-24", "25-44", "45-64", "65+"))
+
+gb_NAD <- ggplot(data_imputed_emomeans_maxweeksg, aes(Age_new, NAD)) + geom_boxplot(varwidth=T, aes(fill= Age_new)) + scale_fill_discrete(name="Age", labels = c("18-24", "25-44", "45-64", "65+"))
+
+gb_PAA <- ggplot(data_imputed_emomeans_maxweeksg, aes(Age_new, PAA)) + geom_boxplot(varwidth=T, aes(fill= Age_new)) + scale_fill_discrete(name="Age", labels = c("18-24", "25-44", "45-64", "65+"))
+
+gb_PAD <- ggplot(data_imputed_emomeans_maxweeksg, aes(Age_new, PAD)) + geom_boxplot(varwidth=T, aes(fill= Age_new)) + scale_fill_discrete(name="Age", labels = c("18-24", "25-44", "45-64", "65+"))
+
+gb_NA <- ggarrange(gb_NAA, gb_NAD, ncol = 2, nrow = 1, common.legend= TRUE, legend = "bottom")
+
+gb_PA <- ggarrange(gb_PAA, gb_PAD, ncol = 2, nrow = 1, common.legend= TRUE, legend = "bottom")
+```
+
+```{r, warning=F}
+gb_NA
+gb_PA
+```
+
+**Histograms of emotion factor scores**
+```{r, results = "hide", message=F, warning=F}
+g_NAA <- ggplot(data_imputed_emomeans_maxweeksg, aes(x=NAA, fill=Age_new)) + geom_histogram(binwidth=1) + scale_fill_discrete(name="Age", labels = c("18-24", "25-44", "45-64", "65+"))
+
+g_NAD <- ggplot(data_imputed_emomeans_maxweeksg, aes(x=NAD, fill=Age_new)) + geom_histogram(binwidth=1) + scale_fill_discrete(name="Age", labels = c("18-24", "25-44", "45-64", "65+"))
+
+g_PAA <- ggplot(data_imputed_emomeans_maxweeksg, aes(x=PAA, fill=Age_new)) + geom_histogram(binwidth=1) + scale_fill_discrete(name="Age", labels = c("18-24", "25-44", "45-64", "65+"))
+
+g_PAD <- ggplot(data_imputed_emomeans_maxweeksg, aes(x=PAD, fill=Age_new)) + geom_histogram(binwidth=1) + scale_fill_discrete(name="Age", labels = c("18-24", "25-44", "45-64", "65+"))
+
+gh_NA <- ggarrange(g_NAA, g_NAD, ncol = 2, nrow = 1, common.legend= TRUE, legend = "bottom")
+
+gh_PA <- ggarrange(g_PAA, g_PAD, ncol = 2, nrow = 1, common.legend= TRUE, legend = "bottom")
+```
+
+```{r, warning=F}
+gh_NA
+gh_PA
+```
+
+# Negative affect high arousal
+**Median NAA against week**
+```{r, echo=T, message=F, warning=F}
+plot_NAA <- ggplot(data_imputed_emomeans_maxweeksg, aes(x=Week, y=NAA))
+
+plot_NAA +  stat_summary(geom = "line", fun = median, size=1) + stat_summary(fun.data = median_hilow, 
+                                                                    fun.args = (conf.int=.5)) + expand_limits(y=c(1, 5))
+```
+
+**Median NAA against maximum stringency in weeks**
+```{r, echo=T, message=F, warning=F}
+plot_NAA <- ggplot(data_imputed_emomeans_maxweeksg, aes(x=WeeksMax, y=NAA))
+
+plot_NAA +  stat_summary(geom = "line", fun = median, size=1) + stat_summary(fun.data = median_hilow, 
+                                                                    fun.args = (conf.int=.5)) + expand_limits(y=c(1, 5))
+```
+
+**Mean NAA against week in different age groups**
+```{r, echo=T, message=F, warning=F}
+plot_NAA <- ggplot(data_imputed_emomeans_maxweeksg, aes(x=Week, y=NAA, group = Age_new, color = Age_new))
+
+plot_NAA + stat_summary(fun.y=mean, geom="line", size=1) + geom_errorbar(stat="summary", fun.data="mean_se", width=0) + scale_colour_discrete(name = "Age", labels = c("18-24", "25-44", "45-64", "65+")) + expand_limits(y=c(1, 5))
+```
+
+**Mean NAA against maximum stringency in weeks**
+```{r, echo=T, message=F, warning=F}
+plot_NAA <- ggplot(data_imputed_emomeans_maxweeksg, aes(x=WeeksMax, y=NAA))
+
+plot_NAA + stat_summary(fun.y=mean, geom="line", size=1) + geom_errorbar(stat="summary", fun.data="mean_se", width=0) + expand_limits(y=c(1, 5))
+```
+
+**Mean NAA against maximum stringency in weeks in different age groups**
+```{r, echo=T, message=F, warning=F}
+plot_NAA <- ggplot(data_imputed_emomeans_maxweeksg, aes(x=WeeksMax, y=NAA, group = Age_new, color = Age_new))
+
+plot_NAA + stat_summary(fun.y=mean, geom="line", size=1) + geom_errorbar(stat="summary", fun.data="mean_se", width=0) + scale_colour_discrete(name = "Age", labels = c("18-24", "25-44", "45-64", "65+")) + expand_limits(y=c(1, 5))
+```
+
+# Negative affect low arousal
+**Median NAD against week**
+```{r, echo=T, message=F, warning=F}
+plot_NAD <- ggplot(data_imputed_emomeans_maxweeksg, aes(x=Week, y=NAD))
+
+plot_NAD +  stat_summary(geom = "line", fun = median, size=1) + stat_summary(fun.data = median_hilow, 
+                                                                    fun.args = (conf.int=.5)) + expand_limits(y=c(1, 5))
+```
+
+**Median NAD against maximum stringency in weeks**
+```{r, echo=T, message=F, warning=F}
+plot_NAD <- ggplot(data_imputed_emomeans_maxweeksg, aes(x=WeeksMax, y=NAD))
+
+plot_NAD +  stat_summary(geom = "line", fun = median, size=1) + stat_summary(fun.data = median_hilow, 
+                                                                    fun.args = (conf.int=.5)) + expand_limits(y=c(1, 5))
+``` 
+
+**Mean NAD against week in different age groups**
+```{r, echo=T, message=F, warning=F}
+plot_NAD <- ggplot(data_imputed_emomeans_maxweeksg, aes(x=Week, y=NAD, group = Age_new, color = Age_new))
+
+plot_NAD + stat_summary(fun.y=mean, geom="line", size=1) + geom_errorbar(stat="summary", fun.data="mean_se", width=0) + scale_colour_discrete(name = "Age", labels = c("18-24", "25-44", "45-64", "65+")) + expand_limits(y=c(1, 5))
+```
+
+**Mean NAD against maximum stringency in weeks**
+```{r, echo=T, message=F, warning=F}
+plot_NAD <- ggplot(data_imputed_emomeans_maxweeksg, aes(x=WeeksMax, y=NAD))
+
+plot_NAD + stat_summary(fun.y=mean, geom="line", size=1) + geom_errorbar(stat="summary", fun.data="mean_se", width=0) + expand_limits(y=c(1, 5))
+```
+
+**Mean NAD against maximum stringency in weeks in different age groups**
+```{r, echo=T, message=F, warning=F}
+plot_NAD <- ggplot(data_imputed_emomeans_maxweeksg, aes(x=WeeksMax, y=NAD, group = Age_new, color = Age_new))
+
+plot_NAD + stat_summary(fun.y=mean, geom="line", size=1) + geom_errorbar(stat="summary", fun.data="mean_se", width=0) + scale_colour_discrete(name = "Age", labels = c("18-24", "25-44", "45-64", "65+")) + expand_limits(y=c(1, 5))
+```
+
+# Positive affect high arousal
+**Median PAA against week**
+```{r, echo=T, message=F, warning=F}
+plot_PAA <- ggplot(data_imputed_emomeans_maxweeksg, aes(x=Week, y=PAA))
+
+plot_PAA +  stat_summary(geom = "line", fun = median, size=1) + stat_summary(fun.data = median_hilow, 
+                                                                    fun.args = (conf.int=.5)) + expand_limits(y=c(1, 5))
+```
+
+**Median PAA against maximum stringency in weeks**
+```{r, echo=T, message=F, warning=F}
+plot_PAA <- ggplot(data_imputed_emomeans_maxweeksg, aes(x=WeeksMax, y=PAA))
+
+plot_PAA +  stat_summary(geom = "line", fun = median, size=1) + stat_summary(fun.data = median_hilow, 
+                                                                    fun.args = (conf.int=.5)) + expand_limits(y=c(1, 5))
+```
+
+**Mean PAA against week in different age groups**
+```{r, echo=T, message=F, warning=F}
+plot_PAA <- ggplot(data_imputed_emomeans_maxweeksg, aes(x=Week, y=PAA, group = Age_new, color = Age_new))
+
+plot_PAA + stat_summary(fun.y=mean, geom="line", size=1) + geom_errorbar(stat="summary", fun.data="mean_se", width=0) + scale_colour_discrete(name = "Age", labels = c("18-24", "25-44", "45-64", "65+")) + expand_limits(y=c(1, 5))
+```
+
+**Mean PAA against maximum stringency in different age groups**
+```{r, echo=T, message=F, warning=F}
+plot_PAA <- ggplot(data_imputed_emomeans_maxweeksg, aes(x=WeeksMax, y=PAA, group = Age_new, color = Age_new))
+
+plot_PAA + stat_summary(fun.y=mean, geom="line", size=1) + geom_errorbar(stat="summary", fun.data="mean_se", width=0) + scale_colour_discrete(name = "Age", labels = c("18-24", "25-44", "45-64", "65+")) + expand_limits(y=c(1, 5))
+```
+
+# Positive affect low arousal
+**Median PAD against week**
+```{r, echo=T, message=F, warning=F}
+plot_PAD <- ggplot(data_imputed_emomeans_maxweeksg, aes(x=Week, y=PAD))
+
+plot_PAD +  stat_summary(geom = "line", fun = median, size=1) + stat_summary(fun.data = median_hilow, 
+                                                                    fun.args = (conf.int=.5)) + expand_limits(y=c(1, 5))
+```
+
+**Median PAD against maximum stringency**
+```{r, echo=T, message=F, warning=F}
+plot_PAD <- ggplot(data_imputed_emomeans_maxweeksg, aes(x=WeeksMax, y=PAD))
+
+plot_PAD +  stat_summary(geom = "line", fun = median, size=1) + stat_summary(fun.data = median_hilow, 
+                                                                    fun.args = (conf.int=.5)) + expand_limits(y=c(1, 5))
+```
+
+**Mean PAD against week in different age groups**
+```{r, echo=T, message=F, warning=F}
+plot_PAD <- ggplot(data_imputed_emomeans_maxweeksg, aes(x=Week, y=PAD, group = Age_new, color = Age_new))
+
+plot_PAD + stat_summary(fun.y=mean, geom="line", size=1) + geom_errorbar(stat="summary", fun.data="mean_se", width=0) + scale_colour_discrete(name = "Age", labels = c("18-24", "25-44", "45-64", "65+")) + expand_limits(y=c(1, 5))
+```
+
+**Mean PAD against maximum stringency in different age groups**
+```{r, echo=T, message=F, warning=F}
+plot_PAD <- ggplot(data_imputed_emomeans_maxweeksg, aes(x=WeeksMax, y=PAD, group = Age_new, color = Age_new))
+
+plot_PAD + stat_summary(fun.y=mean, geom="line", size=1) + geom_errorbar(stat="summary", fun.data="mean_se", width=0) + scale_colour_discrete(name = "Age", labels = c("18-24", "25-44", "45-64", "65+")) + expand_limits(y=c(1, 5))
+```
+
