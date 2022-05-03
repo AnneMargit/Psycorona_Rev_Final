@@ -1,13 +1,23 @@
 Descriptive statistics including gender
 ================
 Anne Margit
-4/25/2021
-
-> Including all gender categories
+5/02/2022
 
 ``` r
-load("data_imputed_emomeans_maxweeksg.Rdata")
+library(dplyr)
+library(tidyverse)
+library(stringr)
+library(papaja)
+library(ggpubr)
+library(ggplot2)
+library(stargazer)
+```
+
+``` r
+load("data_imputed_emomeans_maxweeks.Rdata")
 load("data_long_min3_gstr_age.Rdata")
+
+data_long_min3_str_age <- data_long_min3_gstr_age
 ```
 
 This dataset includes:
@@ -32,21 +42,11 @@ This dataset includes:
 13. A variable indicating the date on which maximum Stringency was
     reached for that country (DateMaxStr)
 
-``` r
-library(dplyr)
-library(tidyverse)
-library(stringr)
-library(papaja)
-library(ggpubr)
-library(ggplot2)
-library(stargazer)
-```
-
 # Missing data
 
 ``` r
 #Missing data
-missing.values <- data_imputed_emomeans_maxweeksg %>%
+missing.values <- data_imputed_emomeans_maxweeks %>%
   gather(key = "key", value = "val") %>%
   dplyr::mutate(is.missing = is.na(val)) %>%
   dplyr::group_by(key, is.missing) %>%
@@ -75,36 +75,35 @@ apa_table(missing.values, caption="Missing data")
 
 | key             | num.missing |
 |:----------------|:------------|
-| Ang             | 66457       |
-| Anxiety         | 66457       |
-| Calm            | 66457       |
-| Depr            | 66457       |
-| Energ           | 66457       |
-| Exh             | 66457       |
-| Insp            | 66457       |
-| NAA             | 66457       |
-| NAD             | 66457       |
-| Nerv            | 66457       |
-| PAA             | 66457       |
-| PAD             | 66457       |
-| Rel             | 66457       |
-| ConfirmedCases  | 66421       |
-| ConfirmedDeaths | 66421       |
-| Date            | 66421       |
-| DaysMax         | 66421       |
-| StringencyIndex | 66421       |
-| Week            | 66421       |
-| WeeksMax        | 66421       |
-| Gender          | 12          |
+| Ang             | 66452       |
+| Anxiety         | 66452       |
+| Calm            | 66452       |
+| Depr            | 66452       |
+| Energ           | 66452       |
+| Exh             | 66452       |
+| Insp            | 66452       |
+| NAA             | 66452       |
+| NAD             | 66452       |
+| Nerv            | 66452       |
+| PAA             | 66452       |
+| PAD             | 66452       |
+| Rel             | 66452       |
+| ConfirmedCases  | 66416       |
+| ConfirmedDeaths | 66416       |
+| Date            | 66416       |
+| DaysMax         | 66416       |
+| StringencyIndex | 66416       |
+| Week            | 66416       |
+| WeeksMax        | 66416       |
 
 # Participants
 
 **Number of participants per country with original data**
 
 ``` r
-data_long_min3_gstr_age$Country <- as.factor(data_long_min3_gstr_age$Country)
+data_long_min3_str_age$Country <- as.factor(data_long_min3_str_age$Country)
 
-Country_N <- data_long_min3_gstr_age %>%
+Country_N <- data_long_min3_str_age %>%
   filter(Time == "1") %>%
   group_by(Country) %>%
   summarise(NCountry = n())
@@ -157,18 +156,18 @@ apa_table(Country_N, caption = "Number of participants per country on baseline")
 | Turkey         | 184      |
 | Ukraine        | 262      |
 | United Kingdom | 469      |
-| United States  | 2383     |
+| United States  | 2382     |
 | Vietnam        | 30       |
 
 **Mean number of participants per country, SD, min and max**
 
 ``` r
-CountryN <- data_long_min3_gstr_age %>%
+CountryN <- data_long_min3_str_age %>%
   group_by(Time, Country) %>%
   filter(Nmiss <9) %>%
   summarise(Ncountry = n_distinct(ID))
 
-CountryNdistinct <- data_long_min3_gstr_age %>%
+CountryNdistinct <- data_long_min3_str_age %>%
   group_by(Time) %>%
   filter(Nmiss <9) %>%
   summarise(Ncountry = n_distinct(Country))
@@ -188,8 +187,8 @@ type="html", df = TRUE, out="CountryMean.doc",  single.row=TRUE, digits = 2, fli
 
     ## 
     ## <table style="text-align:center"><tr><td colspan="13" style="border-bottom: 1px solid black"></td></tr><tr><td>Time</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td><td>11</td><td>12</td></tr>
-    ## <tr><td>MCountry</td><td>318.42</td><td>68.31</td><td>134.10</td><td>138.06</td><td>191.03</td><td>186.94</td><td>175.75</td><td>141.09</td><td>143.42</td><td>129.94</td><td>112.76</td><td>132.42</td></tr>
-    ## <tr><td>SDCountry</td><td>433.71</td><td>133.13</td><td>304.65</td><td>287.40</td><td>235.71</td><td>203.68</td><td>193.85</td><td>147.93</td><td>166.27</td><td>149.83</td><td>127.68</td><td>153.35</td></tr>
+    ## <tr><td>MCountry</td><td>318.39</td><td>68.31</td><td>134.06</td><td>138.03</td><td>191.00</td><td>186.91</td><td>175.75</td><td>141.06</td><td>143.42</td><td>129.91</td><td>112.76</td><td>132.42</td></tr>
+    ## <tr><td>SDCountry</td><td>433.56</td><td>133.13</td><td>304.49</td><td>287.24</td><td>235.57</td><td>203.56</td><td>193.85</td><td>147.84</td><td>166.27</td><td>149.72</td><td>127.68</td><td>153.35</td></tr>
     ## <tr><td colspan="13" style="border-bottom: 1px solid black"></td></tr></table>
 
 ``` r
@@ -208,16 +207,16 @@ apa_table(CountryMean, caption = "Mean number of participants per country on bas
 
 | Time | MCountry | SDCountry |
 |:-----|:---------|:----------|
-| 1    | 318.42   | 433.71    |
+| 1    | 318.39   | 433.56    |
 | 2    | 68.31    | 133.13    |
-| 3    | 134.10   | 304.65    |
-| 4    | 138.06   | 287.40    |
-| 5    | 191.03   | 235.71    |
-| 6    | 186.94   | 203.68    |
+| 3    | 134.06   | 304.49    |
+| 4    | 138.03   | 287.24    |
+| 5    | 191.00   | 235.57    |
+| 6    | 186.91   | 203.56    |
 | 7    | 175.75   | 193.85    |
-| 8    | 141.09   | 147.93    |
+| 8    | 141.06   | 147.84    |
 | 9    | 143.42   | 166.27    |
-| 10   | 129.94   | 149.83    |
+| 10   | 129.91   | 149.72    |
 | 11   | 112.76   | 127.68    |
 | 12   | 132.42   | 153.35    |
 
@@ -227,7 +226,7 @@ apa_table(CountryMean, caption = "Mean number of participants per country on bas
 Create new variable that indicates sum of missings:
 
 ``` r
-data_long_min3_gstr_age <- data_long_min3_gstr_age %>%
+data_long_min3_str_age <- data_long_min3_str_age %>%
   group_by(ID, Time) %>%
 mutate(Nmiss = sum(is.na(Ang)) + sum(is.na(Anxiety)) + sum(is.na(Nerv)) + sum(is.na(Depr)) + sum(is.na(Exh)) + 
                sum(is.na(Energ)) + sum(is.na(Insp)) + sum(is.na(Calm)) + sum(is.na(Rel))) %>%
@@ -235,9 +234,9 @@ mutate(Nmiss = sum(is.na(Ang)) + sum(is.na(Anxiety)) + sum(is.na(Nerv)) + sum(is
 ```
 
 ``` r
-data_long_min3_gstr_age$Time <- as.factor(data_long_min3_gstr_age$Time)
+data_long_min3_str_age$Time <- as.factor(data_long_min3_str_age$Time)
 
-Wave_N_original <- data_long_min3_gstr_age %>% 
+Wave_N_original <- data_long_min3_str_age %>% 
 group_by(Time)%>%
 summarise(NParticipants = n_distinct(ID[Nmiss<9]), NWave = sum (!is.na(Date)), NAng= sum(!is.na(Ang)), NAnx= sum(!is.na(Anxiety)), NNerv= sum(!is.na(Nerv)), NDepr= sum(!is.na(Depr)), NExh= sum(!is.na(Exh)), NEnerg= sum(!is.na(Energ)),  NInsp= sum(!is.na(Insp)), NCalm= sum(!is.na(Calm)), NRel= sum(!is.na(Rel)), NStr = sum(!is.na(StringencyIndex)))
 ```
@@ -258,16 +257,16 @@ apa_table(Wave_N_original, caption="Number of measurements per wave original dat
 
 | Time | NParticipants | NWave | NAng | NAnx  | NNerv | NDepr | NExh  | NEnerg | NInsp | NCalm | NRel  | NStr  |
 |:-----|:--------------|:------|:-----|:------|:------|:------|:------|:-------|:------|:------|:------|:------|
-| 1    | 10508         | 10510 | 0    | 10456 | 10436 | 10440 | 10424 | 10422  | 10420 | 10441 | 10424 | 10510 |
+| 1    | 10507         | 10509 | 0    | 10455 | 10435 | 10439 | 10423 | 10421  | 10419 | 10440 | 10423 | 10509 |
 | 2    | 1093          | 1093  | 1092 | 1092  | 1092  | 1093  | 1092  | 1092   | 1091  | 1092  | 1092  | 1093  |
-| 3    | 4157          | 4158  | 4149 | 4150  | 4150  | 4148  | 4146  | 4148   | 4146  | 4151  | 4149  | 4158  |
-| 4    | 4418          | 4424  | 4410 | 4410  | 4411  | 4408  | 4409  | 4409   | 4406  | 4409  | 4409  | 4424  |
-| 5    | 6113          | 6119  | 6088 | 6094  | 6094  | 6091  | 6089  | 6091   | 6089  | 6098  | 6091  | 6119  |
-| 6    | 5982          | 5984  | 5964 | 5968  | 5965  | 5965  | 5970  | 5967   | 5966  | 5972  | 5972  | 5984  |
+| 3    | 4156          | 4157  | 4148 | 4149  | 4149  | 4147  | 4145  | 4147   | 4145  | 4150  | 4148  | 4157  |
+| 4    | 4417          | 4423  | 4409 | 4409  | 4410  | 4407  | 4408  | 4408   | 4405  | 4408  | 4408  | 4423  |
+| 5    | 6112          | 6118  | 6087 | 6093  | 6093  | 6090  | 6088  | 6090   | 6088  | 6097  | 6090  | 6118  |
+| 6    | 5981          | 5983  | 5963 | 5967  | 5964  | 5964  | 5969  | 5966   | 5965  | 5971  | 5971  | 5983  |
 | 7    | 5624          | 5628  | 5597 | 5608  | 5600  | 5601  | 5603  | 5596   | 5595  | 5610  | 5603  | 5628  |
-| 8    | 4656          | 4663  | 4639 | 4642  | 4640  | 4639  | 4637  | 4638   | 4635  | 4647  | 4638  | 4663  |
+| 8    | 4655          | 4662  | 4638 | 4641  | 4639  | 4638  | 4636  | 4637   | 4634  | 4646  | 4637  | 4662  |
 | 9    | 4733          | 4739  | 4719 | 4716  | 4720  | 4721  | 4717  | 4723   | 4717  | 4722  | 4723  | 4739  |
-| 10   | 4288          | 4289  | 4274 | 4274  | 4276  | 4275  | 4274  | 4275   | 4272  | 4280  | 4278  | 4289  |
+| 10   | 4287          | 4288  | 4273 | 4273  | 4275  | 4274  | 4273  | 4274   | 4271  | 4279  | 4277  | 4288  |
 | 11   | 3721          | 3721  | 3718 | 3716  | 3716  | 3715  | 3715  | 3712   | 3712  | 3713  | 3713  | 3721  |
 | 12   | 4370          | 4371  | 4359 | 4355  | 4351  | 4355  | 4352  | 4351   | 4349  | 4356  | 4354  | 4371  |
 
@@ -280,44 +279,44 @@ type="html", df = TRUE, out="Wave_N_original.doc",  single.row=TRUE, flip = TRUE
 
     ## 
     ## <table style="text-align:center"><tr><td colspan="13" style="border-bottom: 1px solid black"></td></tr><tr><td>Time</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td><td>11</td><td>12</td></tr>
-    ## <tr><td>NParticipants</td><td>10508</td><td>1093</td><td>4157</td><td>4418</td><td>6113</td><td>5982</td><td>5624</td><td>4656</td><td>4733</td><td>4288</td><td>3721</td><td>4370</td></tr>
-    ## <tr><td>NWave</td><td>10510</td><td>1093</td><td>4158</td><td>4424</td><td>6119</td><td>5984</td><td>5628</td><td>4663</td><td>4739</td><td>4289</td><td>3721</td><td>4371</td></tr>
-    ## <tr><td>NAng</td><td>0</td><td>1092</td><td>4149</td><td>4410</td><td>6088</td><td>5964</td><td>5597</td><td>4639</td><td>4719</td><td>4274</td><td>3718</td><td>4359</td></tr>
-    ## <tr><td>NAnx</td><td>10456</td><td>1092</td><td>4150</td><td>4410</td><td>6094</td><td>5968</td><td>5608</td><td>4642</td><td>4716</td><td>4274</td><td>3716</td><td>4355</td></tr>
-    ## <tr><td>NNerv</td><td>10436</td><td>1092</td><td>4150</td><td>4411</td><td>6094</td><td>5965</td><td>5600</td><td>4640</td><td>4720</td><td>4276</td><td>3716</td><td>4351</td></tr>
-    ## <tr><td>NDepr</td><td>10440</td><td>1093</td><td>4148</td><td>4408</td><td>6091</td><td>5965</td><td>5601</td><td>4639</td><td>4721</td><td>4275</td><td>3715</td><td>4355</td></tr>
-    ## <tr><td>NExh</td><td>10424</td><td>1092</td><td>4146</td><td>4409</td><td>6089</td><td>5970</td><td>5603</td><td>4637</td><td>4717</td><td>4274</td><td>3715</td><td>4352</td></tr>
-    ## <tr><td>NEnerg</td><td>10422</td><td>1092</td><td>4148</td><td>4409</td><td>6091</td><td>5967</td><td>5596</td><td>4638</td><td>4723</td><td>4275</td><td>3712</td><td>4351</td></tr>
-    ## <tr><td>NInsp</td><td>10420</td><td>1091</td><td>4146</td><td>4406</td><td>6089</td><td>5966</td><td>5595</td><td>4635</td><td>4717</td><td>4272</td><td>3712</td><td>4349</td></tr>
-    ## <tr><td>NCalm</td><td>10441</td><td>1092</td><td>4151</td><td>4409</td><td>6098</td><td>5972</td><td>5610</td><td>4647</td><td>4722</td><td>4280</td><td>3713</td><td>4356</td></tr>
-    ## <tr><td>NRel</td><td>10424</td><td>1092</td><td>4149</td><td>4409</td><td>6091</td><td>5972</td><td>5603</td><td>4638</td><td>4723</td><td>4278</td><td>3713</td><td>4354</td></tr>
-    ## <tr><td>NStr</td><td>10510</td><td>1093</td><td>4158</td><td>4424</td><td>6119</td><td>5984</td><td>5628</td><td>4663</td><td>4739</td><td>4289</td><td>3721</td><td>4371</td></tr>
+    ## <tr><td>NParticipants</td><td>10507</td><td>1093</td><td>4156</td><td>4417</td><td>6112</td><td>5981</td><td>5624</td><td>4655</td><td>4733</td><td>4287</td><td>3721</td><td>4370</td></tr>
+    ## <tr><td>NWave</td><td>10509</td><td>1093</td><td>4157</td><td>4423</td><td>6118</td><td>5983</td><td>5628</td><td>4662</td><td>4739</td><td>4288</td><td>3721</td><td>4371</td></tr>
+    ## <tr><td>NAng</td><td>0</td><td>1092</td><td>4148</td><td>4409</td><td>6087</td><td>5963</td><td>5597</td><td>4638</td><td>4719</td><td>4273</td><td>3718</td><td>4359</td></tr>
+    ## <tr><td>NAnx</td><td>10455</td><td>1092</td><td>4149</td><td>4409</td><td>6093</td><td>5967</td><td>5608</td><td>4641</td><td>4716</td><td>4273</td><td>3716</td><td>4355</td></tr>
+    ## <tr><td>NNerv</td><td>10435</td><td>1092</td><td>4149</td><td>4410</td><td>6093</td><td>5964</td><td>5600</td><td>4639</td><td>4720</td><td>4275</td><td>3716</td><td>4351</td></tr>
+    ## <tr><td>NDepr</td><td>10439</td><td>1093</td><td>4147</td><td>4407</td><td>6090</td><td>5964</td><td>5601</td><td>4638</td><td>4721</td><td>4274</td><td>3715</td><td>4355</td></tr>
+    ## <tr><td>NExh</td><td>10423</td><td>1092</td><td>4145</td><td>4408</td><td>6088</td><td>5969</td><td>5603</td><td>4636</td><td>4717</td><td>4273</td><td>3715</td><td>4352</td></tr>
+    ## <tr><td>NEnerg</td><td>10421</td><td>1092</td><td>4147</td><td>4408</td><td>6090</td><td>5966</td><td>5596</td><td>4637</td><td>4723</td><td>4274</td><td>3712</td><td>4351</td></tr>
+    ## <tr><td>NInsp</td><td>10419</td><td>1091</td><td>4145</td><td>4405</td><td>6088</td><td>5965</td><td>5595</td><td>4634</td><td>4717</td><td>4271</td><td>3712</td><td>4349</td></tr>
+    ## <tr><td>NCalm</td><td>10440</td><td>1092</td><td>4150</td><td>4408</td><td>6097</td><td>5971</td><td>5610</td><td>4646</td><td>4722</td><td>4279</td><td>3713</td><td>4356</td></tr>
+    ## <tr><td>NRel</td><td>10423</td><td>1092</td><td>4148</td><td>4408</td><td>6090</td><td>5971</td><td>5603</td><td>4637</td><td>4723</td><td>4277</td><td>3713</td><td>4354</td></tr>
+    ## <tr><td>NStr</td><td>10509</td><td>1093</td><td>4157</td><td>4423</td><td>6118</td><td>5983</td><td>5628</td><td>4662</td><td>4739</td><td>4288</td><td>3721</td><td>4371</td></tr>
     ## <tr><td colspan="13" style="border-bottom: 1px solid black"></td></tr></table>
 
 Mean number of assessments per participant
 
 ``` r
-pp_numbers <- data_long_min3_gstr_age  %>% 
+pp_numbers <- data_long_min3_str_age  %>% 
  group_by(ID)%>%
   summarise(n_count = n_distinct(Date))
 
 mean(pp_numbers$n_count)
 ```
 
-    ## [1] 6.620742
+    ## [1] 6.620611
 
 ``` r
 sd(pp_numbers$n_count)
 ```
 
-    ## [1] 2.532316
+    ## [1] 2.532401
 
 **Number of participants and measurements per wave with imputed data**
 
 ``` r
-data_imputed_emomeans_maxweeksg$Time <- as.factor(data_imputed_emomeans_maxweeksg$Time)
+data_imputed_emomeans_maxweeks$Time <- as.factor(data_imputed_emomeans_maxweeks$Time)
 
-Wave_N_imp <- data_imputed_emomeans_maxweeksg %>% 
+Wave_N_imp <- data_imputed_emomeans_maxweeks %>% 
 group_by(Time)%>%
 summarise(NParticipants = n_distinct(ID[Nmiss<9]), NWave = sum (!is.na(Date)), NAng= sum(!is.na(Ang)), NAnx= sum(!is.na(Anxiety)), NNerv= sum(!is.na(Nerv)), NDepr= sum(!is.na(Depr)), NExh= sum(!is.na(Exh)), NEnerg= sum(!is.na(Energ)),  NInsp= sum(!is.na(Insp)), NCalm= sum(!is.na(Calm)), NRel= sum(!is.na(Rel)), NStr = sum(!is.na(StringencyIndex)))
 ```
@@ -338,16 +337,16 @@ apa_table(Wave_N_imp, caption="Number of measurements per wave imputed data")
 
 | Time | NParticipants | NWave | NAng  | NAnx  | NNerv | NDepr | NExh  | NEnerg | NInsp | NCalm | NRel  | NStr  |
 |:-----|:--------------|:------|:------|:------|:------|:------|:------|:-------|:------|:------|:------|:------|
-| 1    | 10508         | 10510 | 10508 | 10508 | 10508 | 10508 | 10508 | 10508  | 10508 | 10508 | 10508 | 10510 |
+| 1    | 10507         | 10509 | 10507 | 10507 | 10507 | 10507 | 10507 | 10507  | 10507 | 10507 | 10507 | 10509 |
 | 2    | 1093          | 1093  | 1093  | 1093  | 1093  | 1093  | 1093  | 1093   | 1093  | 1093  | 1093  | 1093  |
-| 3    | 4157          | 4158  | 4157  | 4157  | 4157  | 4157  | 4157  | 4157   | 4157  | 4157  | 4157  | 4158  |
-| 4    | 4418          | 4424  | 4418  | 4418  | 4418  | 4418  | 4418  | 4418   | 4418  | 4418  | 4418  | 4424  |
-| 5    | 6113          | 6119  | 6113  | 6113  | 6113  | 6113  | 6113  | 6113   | 6113  | 6113  | 6113  | 6119  |
-| 6    | 5982          | 5984  | 5982  | 5982  | 5982  | 5982  | 5982  | 5982   | 5982  | 5982  | 5982  | 5984  |
+| 3    | 4156          | 4157  | 4156  | 4156  | 4156  | 4156  | 4156  | 4156   | 4156  | 4156  | 4156  | 4157  |
+| 4    | 4417          | 4423  | 4417  | 4417  | 4417  | 4417  | 4417  | 4417   | 4417  | 4417  | 4417  | 4423  |
+| 5    | 6112          | 6118  | 6112  | 6112  | 6112  | 6112  | 6112  | 6112   | 6112  | 6112  | 6112  | 6118  |
+| 6    | 5981          | 5983  | 5981  | 5981  | 5981  | 5981  | 5981  | 5981   | 5981  | 5981  | 5981  | 5983  |
 | 7    | 5624          | 5628  | 5624  | 5624  | 5624  | 5624  | 5624  | 5624   | 5624  | 5624  | 5624  | 5628  |
-| 8    | 4656          | 4663  | 4656  | 4656  | 4656  | 4656  | 4656  | 4656   | 4656  | 4656  | 4656  | 4663  |
+| 8    | 4655          | 4662  | 4655  | 4655  | 4655  | 4655  | 4655  | 4655   | 4655  | 4655  | 4655  | 4662  |
 | 9    | 4733          | 4739  | 4733  | 4733  | 4733  | 4733  | 4733  | 4733   | 4733  | 4733  | 4733  | 4739  |
-| 10   | 4288          | 4289  | 4288  | 4288  | 4288  | 4288  | 4288  | 4288   | 4288  | 4288  | 4288  | 4289  |
+| 10   | 4287          | 4288  | 4287  | 4287  | 4287  | 4287  | 4287  | 4287   | 4287  | 4287  | 4287  | 4288  |
 | 11   | 3721          | 3721  | 3721  | 3721  | 3721  | 3721  | 3721  | 3721   | 3721  | 3721  | 3721  | 3721  |
 | 12   | 4370          | 4371  | 4370  | 4370  | 4370  | 4370  | 4370  | 4370   | 4370  | 4370  | 4370  | 4371  |
 
@@ -356,9 +355,9 @@ apa_table(Wave_N_imp, caption="Number of measurements per wave imputed data")
 **Number of participants per age group on baseline**
 
 ``` r
-data_long_min3_gstr_age$Age <- as.factor(data_long_min3_gstr_age$Age)
+data_long_min3_str_age$Age <- as.factor(data_long_min3_str_age$Age)
 
-Age_N <- data_long_min3_gstr_age %>%
+Age_N <- data_long_min3_str_age %>%
   filter(Time=="1" & Nmiss <9) %>%
   group_by(Age) %>%
   summarise(NAge = n())
@@ -383,7 +382,7 @@ apa_table(Age_N, caption="Number of participants per age group on baseline with 
 | 1   | 1365 |
 | 2   | 1974 |
 | 3   | 1912 |
-| 4   | 1870 |
+| 4   | 1869 |
 | 5   | 1805 |
 | 6   | 1386 |
 | 7   | 184  |
@@ -392,9 +391,9 @@ apa_table(Age_N, caption="Number of participants per age group on baseline with 
 **Number of participants per pooled age group**
 
 ``` r
-data_long_min3_gstr_age$Age_new <- as.factor(data_long_min3_gstr_age$Age_new)
+data_long_min3_str_age$Age_new <- as.factor(data_long_min3_str_age$Age_new)
 
-Age_New <- data_long_min3_gstr_age %>%
+Age_New <- data_long_min3_str_age %>%
   group_by(Time, Age_new) %>%
   filter(Nmiss <9) %>%
   summarise(NAge = n())
@@ -419,7 +418,7 @@ data*
 |:-----|:--------|:-----|
 | 1    | 0       | 1365 |
 | 1    | 1       | 3886 |
-| 1    | 2       | 3675 |
+| 1    | 2       | 3674 |
 | 1    | 3       | 1582 |
 | 2    | 0       | 162  |
 | 2    | 1       | 545  |
@@ -427,19 +426,19 @@ data*
 | 2    | 3       | 46   |
 | 3    | 0       | 712  |
 | 3    | 1       | 1959 |
-| 3    | 2       | 1218 |
+| 3    | 2       | 1217 |
 | 3    | 3       | 268  |
 | 4    | 0       | 810  |
 | 4    | 1       | 2007 |
-| 4    | 2       | 1295 |
+| 4    | 2       | 1294 |
 | 4    | 3       | 306  |
 | 5    | 0       | 806  |
 | 5    | 1       | 2194 |
-| 5    | 2       | 2130 |
+| 5    | 2       | 2129 |
 | 5    | 3       | 983  |
 | 6    | 0       | 715  |
 | 6    | 1       | 2067 |
-| 6    | 2       | 2174 |
+| 6    | 2       | 2173 |
 | 6    | 3       | 1026 |
 | 7    | 0       | 602  |
 | 7    | 1       | 1833 |
@@ -447,7 +446,7 @@ data*
 | 7    | 3       | 1037 |
 | 8    | 0       | 478  |
 | 8    | 1       | 1426 |
-| 8    | 2       | 1835 |
+| 8    | 2       | 1834 |
 | 8    | 3       | 917  |
 | 9    | 0       | 466  |
 | 9    | 1       | 1454 |
@@ -455,7 +454,7 @@ data*
 | 9    | 3       | 978  |
 | 10   | 0       | 402  |
 | 10   | 1       | 1328 |
-| 10   | 2       | 1678 |
+| 10   | 2       | 1677 |
 | 10   | 3       | 880  |
 | 11   | 0       | 335  |
 | 11   | 1       | 1082 |
@@ -477,7 +476,7 @@ type="html", df = TRUE, out="Age_New.doc",  single.row=TRUE, digits = 2, align =
     ## <table style="text-align:center"><tr><td colspan="3" style="border-bottom: 1px solid black"></td></tr><tr><td>Time</td><td>Age_new</td><td>NAge</td></tr>
     ## <tr><td colspan="3" style="border-bottom: 1px solid black"></td></tr><tr><td>1</td><td>0</td><td>1365</td></tr>
     ## <tr><td>1</td><td>1</td><td>3886</td></tr>
-    ## <tr><td>1</td><td>2</td><td>3675</td></tr>
+    ## <tr><td>1</td><td>2</td><td>3674</td></tr>
     ## <tr><td>1</td><td>3</td><td>1582</td></tr>
     ## <tr><td>2</td><td>0</td><td>162</td></tr>
     ## <tr><td>2</td><td>1</td><td>545</td></tr>
@@ -485,19 +484,19 @@ type="html", df = TRUE, out="Age_New.doc",  single.row=TRUE, digits = 2, align =
     ## <tr><td>2</td><td>3</td><td>46</td></tr>
     ## <tr><td>3</td><td>0</td><td>712</td></tr>
     ## <tr><td>3</td><td>1</td><td>1959</td></tr>
-    ## <tr><td>3</td><td>2</td><td>1218</td></tr>
+    ## <tr><td>3</td><td>2</td><td>1217</td></tr>
     ## <tr><td>3</td><td>3</td><td>268</td></tr>
     ## <tr><td>4</td><td>0</td><td>810</td></tr>
     ## <tr><td>4</td><td>1</td><td>2007</td></tr>
-    ## <tr><td>4</td><td>2</td><td>1295</td></tr>
+    ## <tr><td>4</td><td>2</td><td>1294</td></tr>
     ## <tr><td>4</td><td>3</td><td>306</td></tr>
     ## <tr><td>5</td><td>0</td><td>806</td></tr>
     ## <tr><td>5</td><td>1</td><td>2194</td></tr>
-    ## <tr><td>5</td><td>2</td><td>2130</td></tr>
+    ## <tr><td>5</td><td>2</td><td>2129</td></tr>
     ## <tr><td>5</td><td>3</td><td>983</td></tr>
     ## <tr><td>6</td><td>0</td><td>715</td></tr>
     ## <tr><td>6</td><td>1</td><td>2067</td></tr>
-    ## <tr><td>6</td><td>2</td><td>2174</td></tr>
+    ## <tr><td>6</td><td>2</td><td>2173</td></tr>
     ## <tr><td>6</td><td>3</td><td>1026</td></tr>
     ## <tr><td>7</td><td>0</td><td>602</td></tr>
     ## <tr><td>7</td><td>1</td><td>1833</td></tr>
@@ -505,7 +504,7 @@ type="html", df = TRUE, out="Age_New.doc",  single.row=TRUE, digits = 2, align =
     ## <tr><td>7</td><td>3</td><td>1037</td></tr>
     ## <tr><td>8</td><td>0</td><td>478</td></tr>
     ## <tr><td>8</td><td>1</td><td>1426</td></tr>
-    ## <tr><td>8</td><td>2</td><td>1835</td></tr>
+    ## <tr><td>8</td><td>2</td><td>1834</td></tr>
     ## <tr><td>8</td><td>3</td><td>917</td></tr>
     ## <tr><td>9</td><td>0</td><td>466</td></tr>
     ## <tr><td>9</td><td>1</td><td>1454</td></tr>
@@ -513,7 +512,7 @@ type="html", df = TRUE, out="Age_New.doc",  single.row=TRUE, digits = 2, align =
     ## <tr><td>9</td><td>3</td><td>978</td></tr>
     ## <tr><td>10</td><td>0</td><td>402</td></tr>
     ## <tr><td>10</td><td>1</td><td>1328</td></tr>
-    ## <tr><td>10</td><td>2</td><td>1678</td></tr>
+    ## <tr><td>10</td><td>2</td><td>1677</td></tr>
     ## <tr><td>10</td><td>3</td><td>880</td></tr>
     ## <tr><td>11</td><td>0</td><td>335</td></tr>
     ## <tr><td>11</td><td>1</td><td>1082</td></tr>
@@ -528,7 +527,7 @@ type="html", df = TRUE, out="Age_New.doc",  single.row=TRUE, digits = 2, align =
 **Number of males and females on baseline**
 
 ``` r
-Gender_N <- data_long_min3_gstr_age %>%
+Gender_N <- data_long_min3_str_age %>%
   filter(Time == "1" & Nmiss <9) %>%
   group_by(Gender) %>%
   count(Gender)
@@ -553,7 +552,6 @@ apa_table(Gender_N, caption="Number of males and females on baseline with origin
 | 0.00   | 3457 |
 | 1.00   | 6998 |
 | 3.00   | 52   |
-| NA     | 1    |
 
 <div custom-style="Compact">
 
@@ -566,7 +564,7 @@ apa_table(Gender_N, caption="Number of males and females on baseline with origin
 **Number of males and females per wave with original data**
 
 ``` r
-Gender_Wave <- data_long_min3_gstr_age %>%
+Gender_Wave <- data_long_min3_str_age %>%
   group_by(Time, Gender) %>%
     filter(Nmiss <9) %>%
   summarize(nGender = n_distinct(ID))
@@ -591,40 +589,33 @@ apa_table(Gender_Wave, caption="Number of males and females per wave", note= "Ge
 | 1    | 0.00   | 3457    |
 | 1    | 1.00   | 6998    |
 | 1    | 3.00   | 52      |
-| 1    | NA     | 1       |
 | 2    | 0.00   | 318     |
 | 2    | 1.00   | 765     |
 | 2    | 3.00   | 10      |
 | 3    | 0.00   | 1109    |
 | 3    | 1.00   | 3014    |
 | 3    | 3.00   | 33      |
-| 3    | NA     | 1       |
 | 4    | 0.00   | 1146    |
 | 4    | 1.00   | 3235    |
 | 4    | 3.00   | 36      |
-| 4    | NA     | 1       |
 | 5    | 0.00   | 2093    |
 | 5    | 1.00   | 3985    |
 | 5    | 3.00   | 34      |
-| 5    | NA     | 1       |
 | 6    | 0.00   | 2026    |
 | 6    | 1.00   | 3928    |
 | 6    | 3.00   | 27      |
-| 6    | NA     | 1       |
 | 7    | 0.00   | 1948    |
 | 7    | 1.00   | 3645    |
 | 7    | 3.00   | 31      |
 | 8    | 0.00   | 1615    |
 | 8    | 1.00   | 3020    |
 | 8    | 3.00   | 20      |
-| 8    | NA     | 1       |
 | 9    | 0.00   | 1617    |
 | 9    | 1.00   | 3095    |
 | 9    | 3.00   | 21      |
 | 10   | 0.00   | 1462    |
 | 10   | 1.00   | 2805    |
 | 10   | 3.00   | 20      |
-| 10   | NA     | 1       |
 | 11   | 0.00   | 1265    |
 | 11   | 1.00   | 2442    |
 | 11   | 3.00   | 14      |
@@ -648,16 +639,16 @@ type="html", df = TRUE, out="Gender_Wave.doc",  single.row=TRUE, digits = 2, fli
 ```
 
     ## 
-    ## <table style="text-align:center"><tr><td colspan="44" style="border-bottom: 1px solid black"></td></tr><tr><td>Time</td><td>1</td><td>1</td><td>1</td><td>1</td><td>2</td><td>2</td><td>2</td><td>3</td><td>3</td><td>3</td><td>3</td><td>4</td><td>4</td><td>4</td><td>4</td><td>5</td><td>5</td><td>5</td><td>5</td><td>6</td><td>6</td><td>6</td><td>6</td><td>7</td><td>7</td><td>7</td><td>8</td><td>8</td><td>8</td><td>8</td><td>9</td><td>9</td><td>9</td><td>10</td><td>10</td><td>10</td><td>10</td><td>11</td><td>11</td><td>11</td><td>12</td><td>12</td><td>12</td></tr>
-    ## <tr><td>Gender</td><td>0</td><td>1</td><td>3</td><td></td><td>0</td><td>1</td><td>3</td><td>0</td><td>1</td><td>3</td><td></td><td>0</td><td>1</td><td>3</td><td></td><td>0</td><td>1</td><td>3</td><td></td><td>0</td><td>1</td><td>3</td><td></td><td>0</td><td>1</td><td>3</td><td>0</td><td>1</td><td>3</td><td></td><td>0</td><td>1</td><td>3</td><td>0</td><td>1</td><td>3</td><td></td><td>0</td><td>1</td><td>3</td><td>0</td><td>1</td><td>3</td></tr>
-    ## <tr><td>nGender</td><td>3457</td><td>6998</td><td>52</td><td>1</td><td>318</td><td>765</td><td>10</td><td>1109</td><td>3014</td><td>33</td><td>1</td><td>1146</td><td>3235</td><td>36</td><td>1</td><td>2093</td><td>3985</td><td>34</td><td>1</td><td>2026</td><td>3928</td><td>27</td><td>1</td><td>1948</td><td>3645</td><td>31</td><td>1615</td><td>3020</td><td>20</td><td>1</td><td>1617</td><td>3095</td><td>21</td><td>1462</td><td>2805</td><td>20</td><td>1</td><td>1265</td><td>2442</td><td>14</td><td>1422</td><td>2928</td><td>20</td></tr>
-    ## <tr><td colspan="44" style="border-bottom: 1px solid black"></td></tr></table>
+    ## <table style="text-align:center"><tr><td colspan="37" style="border-bottom: 1px solid black"></td></tr><tr><td>Time</td><td>1</td><td>1</td><td>1</td><td>2</td><td>2</td><td>2</td><td>3</td><td>3</td><td>3</td><td>4</td><td>4</td><td>4</td><td>5</td><td>5</td><td>5</td><td>6</td><td>6</td><td>6</td><td>7</td><td>7</td><td>7</td><td>8</td><td>8</td><td>8</td><td>9</td><td>9</td><td>9</td><td>10</td><td>10</td><td>10</td><td>11</td><td>11</td><td>11</td><td>12</td><td>12</td><td>12</td></tr>
+    ## <tr><td>Gender</td><td>0</td><td>1</td><td>3</td><td>0</td><td>1</td><td>3</td><td>0</td><td>1</td><td>3</td><td>0</td><td>1</td><td>3</td><td>0</td><td>1</td><td>3</td><td>0</td><td>1</td><td>3</td><td>0</td><td>1</td><td>3</td><td>0</td><td>1</td><td>3</td><td>0</td><td>1</td><td>3</td><td>0</td><td>1</td><td>3</td><td>0</td><td>1</td><td>3</td><td>0</td><td>1</td><td>3</td></tr>
+    ## <tr><td>nGender</td><td>3457</td><td>6998</td><td>52</td><td>318</td><td>765</td><td>10</td><td>1109</td><td>3014</td><td>33</td><td>1146</td><td>3235</td><td>36</td><td>2093</td><td>3985</td><td>34</td><td>2026</td><td>3928</td><td>27</td><td>1948</td><td>3645</td><td>31</td><td>1615</td><td>3020</td><td>20</td><td>1617</td><td>3095</td><td>21</td><td>1462</td><td>2805</td><td>20</td><td>1265</td><td>2442</td><td>14</td><td>1422</td><td>2928</td><td>20</td></tr>
+    ## <tr><td colspan="37" style="border-bottom: 1px solid black"></td></tr></table>
 
 **Number of males and females per pooled age group on baseline with
 original data**
 
 ``` r
-Age_New_Gender <- data_long_min3_gstr_age %>%
+Age_New_Gender <- data_long_min3_str_age %>%
   filter(Time == "1") %>%
   select(Age_new, Gender) %>%
   group_by(Age_new, Gender) %>%
@@ -690,7 +681,6 @@ apa_table(Age_New_Gender, caption = "Number of males and females per pooled age 
 | 2       | 0.00   | 1306 |
 | 2       | 1.00   | 2366 |
 | 2       | 3.00   | 3    |
-| 2       | NA     | 1    |
 | 3       | 0.00   | 838  |
 | 3       | 1.00   | 744  |
 | 3       | 3.00   | 1    |
@@ -710,7 +700,7 @@ female
 Stringency Index per country**
 
 ``` r
-StringencySummary <- data_long_min3_gstr_age %>%
+StringencySummary <- data_long_min3_str_age %>%
   group_by(Country)%>%
   summarize(Str_mean = mean(StringencyIndex, na.rm=TRUE), Str_SD = sd(StringencyIndex, na.rm=TRUE), 
             Str_max = max(StringencyIndex, na.rm=TRUE), Str_min = min(StringencyIndex, na.rm=TRUE),
@@ -771,7 +761,7 @@ apa_table(StringencySummary, caption="Stringency Index per country with original
 **Mean and SD, minimum and maximum of Stringency Index per wave**
 
 ``` r
-StringencySummary2 <- data_long_min3_gstr_age %>%
+StringencySummary2 <- data_long_min3_str_age %>%
   group_by(Time)%>%
   filter(Nmiss <9)%>%
   summarize(Str_mean = mean(StringencyIndex, na.rm=TRUE), Str_SD = sd(StringencyIndex, na.rm=TRUE), 
@@ -826,24 +816,24 @@ type="html", df = TRUE, out="StringencySummary2.doc",  single.row=TRUE, digits =
 **Stringency Index violin plots**
 
 ``` r
-data_imputed_emomeans_maxweeksg$Country <- as.character(data_imputed_emomeans_maxweeksg$Country)
+data_imputed_emomeans_maxweeks$Country <- as.character(data_imputed_emomeans_maxweeks$Country)
 
-data_graphs1 <- data_imputed_emomeans_maxweeksg %>%
+data_graphs1 <- data_imputed_emomeans_maxweeks %>%
 filter(Country == "Argentina" |  Country == "Australia" | Country == "Brazil" | Country == "Canada" | Country == "Chile" | Country == "Croatia")
 
-data_graphs2 <- data_imputed_emomeans_maxweeksg %>%
+data_graphs2 <- data_imputed_emomeans_maxweeks %>%
 filter(Country == "France" | Country == "Germany" | Country == "Greece" | Country == "Hungary" | Country == "Indonesia" | Country == "Italy")
 
-data_graphs3 <- data_imputed_emomeans_maxweeksg %>%
+data_graphs3 <- data_imputed_emomeans_maxweeks %>%
 filter(Country == "Japan" | Country == "Kazakhstan" | Country == "Kosovo" | Country == "Malaysia" | Country == "Netherlands" | Country == "Peru")
 
-data_graphs4 <- data_imputed_emomeans_maxweeksg %>%
+data_graphs4 <- data_imputed_emomeans_maxweeks %>%
 filter(Country == "Philippines" | Country == "Poland" | Country == "Serbia" | Country == "Romania" | Country == "Russia" | Country == "Saudi Arabia")
 
-data_graphs5 <- data_imputed_emomeans_maxweeksg %>%
+data_graphs5 <- data_imputed_emomeans_maxweeks %>%
 filter(Country == "Singapore" | Country == "South Africa" | Country == "South Korea" | Country == "Spain" | Country == "Turkey" | Country == "Ukraine")
 
-data_graphs6 <- data_imputed_emomeans_maxweeksg %>%
+data_graphs6 <- data_imputed_emomeans_maxweeks %>%
 filter(Country == "United Kingdom" | Country == "United States" | Country == "Vietnam")
 
 
@@ -864,37 +854,37 @@ g_s6 <- ggplot(data_graphs6, aes(StringencyIndex, Country)) + geom_violin(aes(fi
 g_s1
 ```
 
-![](Descriptive-statistics-and-plots_files/figure-gfm/unnamed-chunk-35-1.png)<!-- -->
+![](Descriptive-statistics-including-gender_files/figure-gfm/unnamed-chunk-35-1.png)<!-- -->
 
 ``` r
 g_s2
 ```
 
-![](Descriptive-statistics-and-plots_files/figure-gfm/unnamed-chunk-35-2.png)<!-- -->
+![](Descriptive-statistics-including-gender_files/figure-gfm/unnamed-chunk-35-2.png)<!-- -->
 
 ``` r
 g_s3
 ```
 
-![](Descriptive-statistics-and-plots_files/figure-gfm/unnamed-chunk-35-3.png)<!-- -->
+![](Descriptive-statistics-including-gender_files/figure-gfm/unnamed-chunk-35-3.png)<!-- -->
 
 ``` r
 g_s4
 ```
 
-![](Descriptive-statistics-and-plots_files/figure-gfm/unnamed-chunk-35-4.png)<!-- -->
+![](Descriptive-statistics-including-gender_files/figure-gfm/unnamed-chunk-35-4.png)<!-- -->
 
 ``` r
 g_s5
 ```
 
-![](Descriptive-statistics-and-plots_files/figure-gfm/unnamed-chunk-35-5.png)<!-- -->
+![](Descriptive-statistics-including-gender_files/figure-gfm/unnamed-chunk-35-5.png)<!-- -->
 
 ``` r
 g_s6
 ```
 
-![](Descriptive-statistics-and-plots_files/figure-gfm/unnamed-chunk-35-6.png)<!-- -->
+![](Descriptive-statistics-including-gender_files/figure-gfm/unnamed-chunk-35-6.png)<!-- -->
 
 **Stringency Index over time per country**
 
@@ -967,44 +957,44 @@ g_s12 <- ggplot(data_graphs6, aes(x=Date, y=StringencyIndex)) +
 g_s7
 ```
 
-![](Descriptive-statistics-and-plots_files/figure-gfm/unnamed-chunk-37-1.png)<!-- -->
+![](Descriptive-statistics-including-gender_files/figure-gfm/unnamed-chunk-37-1.png)<!-- -->
 
 ``` r
 g_s8
 ```
 
-![](Descriptive-statistics-and-plots_files/figure-gfm/unnamed-chunk-37-2.png)<!-- -->
+![](Descriptive-statistics-including-gender_files/figure-gfm/unnamed-chunk-37-2.png)<!-- -->
 
 ``` r
 g_s9
 ```
 
-![](Descriptive-statistics-and-plots_files/figure-gfm/unnamed-chunk-37-3.png)<!-- -->
+![](Descriptive-statistics-including-gender_files/figure-gfm/unnamed-chunk-37-3.png)<!-- -->
 
 ``` r
 g_s10
 ```
 
-![](Descriptive-statistics-and-plots_files/figure-gfm/unnamed-chunk-37-4.png)<!-- -->
+![](Descriptive-statistics-including-gender_files/figure-gfm/unnamed-chunk-37-4.png)<!-- -->
 
 ``` r
 g_s11
 ```
 
-![](Descriptive-statistics-and-plots_files/figure-gfm/unnamed-chunk-37-5.png)<!-- -->
+![](Descriptive-statistics-including-gender_files/figure-gfm/unnamed-chunk-37-5.png)<!-- -->
 
 ``` r
 g_s12
 ```
 
-![](Descriptive-statistics-and-plots_files/figure-gfm/unnamed-chunk-37-6.png)<!-- -->
+![](Descriptive-statistics-including-gender_files/figure-gfm/unnamed-chunk-37-6.png)<!-- -->
 
 # Emotions
 
 **Mean, SD, and median of emotion factor scores**
 
 ``` r
-emomeansN <- data_imputed_emomeans_maxweeksg %>%
+emomeansN <- data_imputed_emomeans_maxweeks %>%
   group_by(Time) %>%
   summarise(across(NAA:PAD, .fns=list(Mean = mean, SD = sd, Median = median), na.rm=TRUE,
                    .names="{col}_{fn}"))
@@ -1038,7 +1028,7 @@ apa_table(emomeansN, caption="Mean scores of emotion factor scores per wave")
 | 7    | 2.15     | 0.97   | 2.00       | 2.15     | 1.01   | 2.00       | 2.61     | 1.00   | 2.50       | 3.02     | 0.99   | 3.00       |
 | 8    | 2.13     | 0.98   | 2.00       | 2.12     | 1.01   | 2.00       | 2.66     | 0.99   | 2.50       | 3.04     | 1.00   | 3.00       |
 | 9    | 2.10     | 0.98   | 2.00       | 2.12     | 1.01   | 2.00       | 2.65     | 0.99   | 2.50       | 3.05     | 1.01   | 3.00       |
-| 10   | 2.11     | 0.97   | 2.00       | 2.11     | 1.01   | 2.00       | 2.68     | 1.00   | 2.50       | 3.03     | 1.00   | 3.00       |
+| 10   | 2.11     | 0.97   | 2.00       | 2.11     | 1.01   | 2.00       | 2.68     | 1.00   | 2.50       | 3.04     | 1.00   | 3.00       |
 | 11   | 2.07     | 0.99   | 2.00       | 2.10     | 1.02   | 2.00       | 2.68     | 1.00   | 2.50       | 3.02     | 1.02   | 3.00       |
 | 12   | 2.06     | 0.97   | 2.00       | 2.10     | 1.00   | 2.00       | 2.73     | 1.00   | 3.00       | 3.05     | 1.00   | 3.00       |
 
@@ -1060,7 +1050,7 @@ type="html", df = TRUE, out="emomeansN.doc",  single.row=TRUE, digits = 2, flip 
     ## <tr><td>PAA_Mean</td><td>2.41</td><td>2.27</td><td>2.47</td><td>2.50</td><td>2.54</td><td>2.59</td><td>2.61</td><td>2.66</td><td>2.65</td><td>2.68</td><td>2.68</td><td>2.73</td></tr>
     ## <tr><td>PAA_SD</td><td>0.96</td><td>0.92</td><td>0.94</td><td>0.94</td><td>0.96</td><td>0.98</td><td>1.00</td><td>0.99</td><td>0.99</td><td>1.00</td><td>1.00</td><td>1.00</td></tr>
     ## <tr><td>PAA_Median</td><td>2.5</td><td>2.0</td><td>2.5</td><td>2.5</td><td>2.5</td><td>2.5</td><td>2.5</td><td>2.5</td><td>2.5</td><td>2.5</td><td>2.5</td><td>3.0</td></tr>
-    ## <tr><td>PAD_Mean</td><td>2.81</td><td>2.77</td><td>2.94</td><td>2.96</td><td>3.00</td><td>3.01</td><td>3.02</td><td>3.04</td><td>3.05</td><td>3.03</td><td>3.02</td><td>3.05</td></tr>
+    ## <tr><td>PAD_Mean</td><td>2.81</td><td>2.77</td><td>2.94</td><td>2.96</td><td>3.00</td><td>3.01</td><td>3.02</td><td>3.04</td><td>3.05</td><td>3.04</td><td>3.02</td><td>3.05</td></tr>
     ## <tr><td>PAD_SD</td><td>1.01</td><td>0.97</td><td>0.95</td><td>0.96</td><td>0.99</td><td>0.98</td><td>0.99</td><td>1.00</td><td>1.01</td><td>1.00</td><td>1.02</td><td>1.00</td></tr>
     ## <tr><td>PAD_Median</td><td>3</td><td>3</td><td>3</td><td>3</td><td>3</td><td>3</td><td>3</td><td>3</td><td>3</td><td>3</td><td>3</td><td>3</td></tr>
     ## <tr><td colspan="13" style="border-bottom: 1px solid black"></td></tr></table>
@@ -1068,7 +1058,7 @@ type="html", df = TRUE, out="emomeansN.doc",  single.row=TRUE, digits = 2, flip 
 **Mean, SD, and median of emotion scores**
 
 ``` r
-emorawmeansN <- data_imputed_emomeans_maxweeksg %>%
+emorawmeansN <- data_imputed_emomeans_maxweeks %>%
   group_by(Time) %>%
   summarise(across(Ang:Rel, .fns=list(Mean = mean, SD = sd, Median = median), na.rm=TRUE,
                    .names="{col}_{fn}"))
@@ -1097,9 +1087,9 @@ apa_table(emorawmeansN, caption="Mean scores of emotion scores per wave")
 | 5    | 1.99     | 1.12   | 2.00       | 2.37         | 1.17       | 2.00           | 2.23      | 1.13    | 2.00        | 2.02      | 1.12    | 2.00        | 2.33     | 1.19   | 2.00       | 2.63       | 1.06     | 3.00         | 2.45      | 1.11    | 2.00        | 3.08      | 1.05    | 3.00        | 2.91     | 1.08   | 3.00       |
 | 6    | 2.00     | 1.14   | 2.00       | 2.34         | 1.18       | 2.00           | 2.20      | 1.15    | 2.00        | 2.02      | 1.12    | 2.00        | 2.32     | 1.19   | 2.00       | 2.67       | 1.06     | 3.00         | 2.51      | 1.12    | 3.00        | 3.11      | 1.05    | 3.00        | 2.91     | 1.08   | 3.00       |
 | 7    | 1.99     | 1.13   | 2.00       | 2.29         | 1.18       | 2.00           | 2.18      | 1.13    | 2.00        | 1.98      | 1.11    | 2.00        | 2.33     | 1.19   | 2.00       | 2.70       | 1.07     | 3.00         | 2.52      | 1.12    | 3.00        | 3.11      | 1.06    | 3.00        | 2.92     | 1.08   | 3.00       |
-| 8    | 1.99     | 1.13   | 2.00       | 2.26         | 1.18       | 2.00           | 2.15      | 1.13    | 2.00        | 1.94      | 1.10    | 2.00        | 2.31     | 1.20   | 2.00       | 2.75       | 1.08     | 3.00         | 2.57      | 1.11    | 3.00        | 3.12      | 1.06    | 3.00        | 2.95     | 1.09   | 3.00       |
+| 8    | 1.99     | 1.13   | 2.00       | 2.26         | 1.18       | 2.00           | 2.15      | 1.13    | 2.00        | 1.93      | 1.10    | 2.00        | 2.31     | 1.20   | 2.00       | 2.75       | 1.08     | 3.00         | 2.57      | 1.11    | 3.00        | 3.12      | 1.07    | 3.00        | 2.95     | 1.09   | 3.00       |
 | 9    | 1.94     | 1.12   | 2.00       | 2.22         | 1.17       | 2.00           | 2.12      | 1.13    | 2.00        | 1.92      | 1.10    | 2.00        | 2.31     | 1.20   | 2.00       | 2.75       | 1.08     | 3.00         | 2.55      | 1.11    | 3.00        | 3.13      | 1.06    | 3.00        | 2.96     | 1.09   | 3.00       |
-| 10   | 2.00     | 1.15   | 2.00       | 2.22         | 1.17       | 2.00           | 2.11      | 1.10    | 2.00        | 1.90      | 1.09    | 2.00        | 2.32     | 1.20   | 2.00       | 2.76       | 1.07     | 3.00         | 2.59      | 1.12    | 3.00        | 3.12      | 1.06    | 3.00        | 2.95     | 1.10   | 3.00       |
+| 10   | 2.00     | 1.15   | 2.00       | 2.22         | 1.17       | 2.00           | 2.11      | 1.10    | 2.00        | 1.90      | 1.09    | 2.00        | 2.32     | 1.20   | 2.00       | 2.76       | 1.07     | 3.00         | 2.59      | 1.11    | 3.00        | 3.12      | 1.06    | 3.00        | 2.95     | 1.10   | 3.00       |
 | 11   | 1.97     | 1.14   | 2.00       | 2.16         | 1.19       | 2.00           | 2.07      | 1.11    | 2.00        | 1.87      | 1.08    | 2.00        | 2.32     | 1.22   | 2.00       | 2.76       | 1.08     | 3.00         | 2.60      | 1.12    | 3.00        | 3.10      | 1.08    | 3.00        | 2.94     | 1.11   | 3.00       |
 | 12   | 1.92     | 1.12   | 2.00       | 2.18         | 1.18       | 2.00           | 2.08      | 1.11    | 2.00        | 1.87      | 1.07    | 2.00        | 2.33     | 1.20   | 2.00       | 2.82       | 1.07     | 3.00         | 2.65      | 1.12    | 3.00        | 3.12      | 1.07    | 3.00        | 2.98     | 1.09   | 3.00       |
 
@@ -1108,13 +1098,13 @@ apa_table(emorawmeansN, caption="Mean scores of emotion scores per wave")
 ``` r
 theme_set(theme_classic())
 
-gb_NAA <- ggplot(data_imputed_emomeans_maxweeksg, aes(Age_new, NAA)) + geom_boxplot(varwidth=T, aes(fill= Age_new)) + scale_fill_discrete(name="Age", labels = c("18-24", "25-44", "45-64", "65+"))
+gb_NAA <- ggplot(data_imputed_emomeans_maxweeks, aes(Age_new, NAA)) + geom_boxplot(varwidth=T, aes(fill= Age_new)) + scale_fill_discrete(name="Age", labels = c("18-24", "25-44", "45-64", "65+"))
 
-gb_NAD <- ggplot(data_imputed_emomeans_maxweeksg, aes(Age_new, NAD)) + geom_boxplot(varwidth=T, aes(fill= Age_new)) + scale_fill_discrete(name="Age", labels = c("18-24", "25-44", "45-64", "65+"))
+gb_NAD <- ggplot(data_imputed_emomeans_maxweeks, aes(Age_new, NAD)) + geom_boxplot(varwidth=T, aes(fill= Age_new)) + scale_fill_discrete(name="Age", labels = c("18-24", "25-44", "45-64", "65+"))
 
-gb_PAA <- ggplot(data_imputed_emomeans_maxweeksg, aes(Age_new, PAA)) + geom_boxplot(varwidth=T, aes(fill= Age_new)) + scale_fill_discrete(name="Age", labels = c("18-24", "25-44", "45-64", "65+"))
+gb_PAA <- ggplot(data_imputed_emomeans_maxweeks, aes(Age_new, PAA)) + geom_boxplot(varwidth=T, aes(fill= Age_new)) + scale_fill_discrete(name="Age", labels = c("18-24", "25-44", "45-64", "65+"))
 
-gb_PAD <- ggplot(data_imputed_emomeans_maxweeksg, aes(Age_new, PAD)) + geom_boxplot(varwidth=T, aes(fill= Age_new)) + scale_fill_discrete(name="Age", labels = c("18-24", "25-44", "45-64", "65+"))
+gb_PAD <- ggplot(data_imputed_emomeans_maxweeks, aes(Age_new, PAD)) + geom_boxplot(varwidth=T, aes(fill= Age_new)) + scale_fill_discrete(name="Age", labels = c("18-24", "25-44", "45-64", "65+"))
 
 gb_NA <- ggarrange(gb_NAA, gb_NAD, ncol = 2, nrow = 1, common.legend= TRUE, legend = "bottom")
 
@@ -1125,24 +1115,24 @@ gb_PA <- ggarrange(gb_PAA, gb_PAD, ncol = 2, nrow = 1, common.legend= TRUE, lege
 gb_NA
 ```
 
-![](Descriptive-statistics-and-plots_files/figure-gfm/unnamed-chunk-44-1.png)<!-- -->
+![](Descriptive-statistics-including-gender_files/figure-gfm/unnamed-chunk-44-1.png)<!-- -->
 
 ``` r
 gb_PA
 ```
 
-![](Descriptive-statistics-and-plots_files/figure-gfm/unnamed-chunk-44-2.png)<!-- -->
+![](Descriptive-statistics-including-gender_files/figure-gfm/unnamed-chunk-44-2.png)<!-- -->
 
 **Histograms of emotion factor scores**
 
 ``` r
-g_NAA <- ggplot(data_imputed_emomeans_maxweeksg, aes(x=NAA, fill=Age_new)) + geom_histogram(binwidth=1) + scale_fill_discrete(name="Age", labels = c("18-24", "25-44", "45-64", "65+"))
+g_NAA <- ggplot(data_imputed_emomeans_maxweeks, aes(x=NAA, fill=Age_new)) + geom_histogram(binwidth=1) + scale_fill_discrete(name="Age", labels = c("18-24", "25-44", "45-64", "65+"))
 
-g_NAD <- ggplot(data_imputed_emomeans_maxweeksg, aes(x=NAD, fill=Age_new)) + geom_histogram(binwidth=1) + scale_fill_discrete(name="Age", labels = c("18-24", "25-44", "45-64", "65+"))
+g_NAD <- ggplot(data_imputed_emomeans_maxweeks, aes(x=NAD, fill=Age_new)) + geom_histogram(binwidth=1) + scale_fill_discrete(name="Age", labels = c("18-24", "25-44", "45-64", "65+"))
 
-g_PAA <- ggplot(data_imputed_emomeans_maxweeksg, aes(x=PAA, fill=Age_new)) + geom_histogram(binwidth=1) + scale_fill_discrete(name="Age", labels = c("18-24", "25-44", "45-64", "65+"))
+g_PAA <- ggplot(data_imputed_emomeans_maxweeks, aes(x=PAA, fill=Age_new)) + geom_histogram(binwidth=1) + scale_fill_discrete(name="Age", labels = c("18-24", "25-44", "45-64", "65+"))
 
-g_PAD <- ggplot(data_imputed_emomeans_maxweeksg, aes(x=PAD, fill=Age_new)) + geom_histogram(binwidth=1) + scale_fill_discrete(name="Age", labels = c("18-24", "25-44", "45-64", "65+"))
+g_PAD <- ggplot(data_imputed_emomeans_maxweeks, aes(x=PAD, fill=Age_new)) + geom_histogram(binwidth=1) + scale_fill_discrete(name="Age", labels = c("18-24", "25-44", "45-64", "65+"))
 
 gh_NA <- ggarrange(g_NAA, g_NAD, ncol = 2, nrow = 1, common.legend= TRUE, legend = "bottom")
 
@@ -1153,206 +1143,206 @@ gh_PA <- ggarrange(g_PAA, g_PAD, ncol = 2, nrow = 1, common.legend= TRUE, legend
 gh_NA
 ```
 
-![](Descriptive-statistics-and-plots_files/figure-gfm/unnamed-chunk-46-1.png)<!-- -->
+![](Descriptive-statistics-including-gender_files/figure-gfm/unnamed-chunk-46-1.png)<!-- -->
 
 ``` r
 gh_PA
 ```
 
-![](Descriptive-statistics-and-plots_files/figure-gfm/unnamed-chunk-46-2.png)<!-- -->
+![](Descriptive-statistics-including-gender_files/figure-gfm/unnamed-chunk-46-2.png)<!-- -->
 
 # Negative affect high arousal
 
 **Median NAA against week**
 
 ``` r
-plot_NAA <- ggplot(data_imputed_emomeans_maxweeksg, aes(x=Week, y=NAA))
+plot_NAA <- ggplot(data_imputed_emomeans_maxweeks, aes(x=Week, y=NAA))
 
 plot_NAA +  stat_summary(geom = "line", fun = median, size=1) + stat_summary(fun.data = median_hilow, 
                                                                     fun.args = (conf.int=.5)) + expand_limits(y=c(1, 5))
 ```
 
-![](Descriptive-statistics-and-plots_files/figure-gfm/unnamed-chunk-47-1.png)<!-- -->
+![](Descriptive-statistics-including-gender_files/figure-gfm/unnamed-chunk-47-1.png)<!-- -->
 
 **Median NAA against maximum stringency in weeks**
 
 ``` r
-plot_NAA <- ggplot(data_imputed_emomeans_maxweeksg, aes(x=WeeksMax, y=NAA))
+plot_NAA <- ggplot(data_imputed_emomeans_maxweeks, aes(x=WeeksMax, y=NAA))
 
 plot_NAA +  stat_summary(geom = "line", fun = median, size=1) + stat_summary(fun.data = median_hilow, 
                                                                     fun.args = (conf.int=.5)) + expand_limits(y=c(1, 5))
 ```
 
-![](Descriptive-statistics-and-plots_files/figure-gfm/unnamed-chunk-48-1.png)<!-- -->
+![](Descriptive-statistics-including-gender_files/figure-gfm/unnamed-chunk-48-1.png)<!-- -->
 
 **Mean NAA against week in different age groups**
 
 ``` r
-plot_NAA <- ggplot(data_imputed_emomeans_maxweeksg, aes(x=Week, y=NAA, group = Age_new, color = Age_new))
+plot_NAA <- ggplot(data_imputed_emomeans_maxweeks, aes(x=Week, y=NAA, group = Age_new, color = Age_new))
 
 plot_NAA + stat_summary(fun.y=mean, geom="line", size=1) + geom_errorbar(stat="summary", fun.data="mean_se", width=0) + scale_colour_discrete(name = "Age", labels = c("18-24", "25-44", "45-64", "65+")) + expand_limits(y=c(1, 5))
 ```
 
-![](Descriptive-statistics-and-plots_files/figure-gfm/unnamed-chunk-49-1.png)<!-- -->
+![](Descriptive-statistics-including-gender_files/figure-gfm/unnamed-chunk-49-1.png)<!-- -->
 
 **Mean NAA against maximum stringency in weeks**
 
 ``` r
-plot_NAA <- ggplot(data_imputed_emomeans_maxweeksg, aes(x=WeeksMax, y=NAA))
+plot_NAA <- ggplot(data_imputed_emomeans_maxweeks, aes(x=WeeksMax, y=NAA))
 
 plot_NAA + stat_summary(fun.y=mean, geom="line", size=1) + geom_errorbar(stat="summary", fun.data="mean_se", width=0) + expand_limits(y=c(1, 5))
 ```
 
-![](Descriptive-statistics-and-plots_files/figure-gfm/unnamed-chunk-50-1.png)<!-- -->
+![](Descriptive-statistics-including-gender_files/figure-gfm/unnamed-chunk-50-1.png)<!-- -->
 
 **Mean NAA against maximum stringency in weeks in different age groups**
 
 ``` r
-plot_NAA <- ggplot(data_imputed_emomeans_maxweeksg, aes(x=WeeksMax, y=NAA, group = Age_new, color = Age_new))
+plot_NAA <- ggplot(data_imputed_emomeans_maxweeks, aes(x=WeeksMax, y=NAA, group = Age_new, color = Age_new))
 
 plot_NAA + stat_summary(fun.y=mean, geom="line", size=1) + geom_errorbar(stat="summary", fun.data="mean_se", width=0) + scale_colour_discrete(name = "Age", labels = c("18-24", "25-44", "45-64", "65+")) + expand_limits(y=c(1, 5))
 ```
 
-![](Descriptive-statistics-and-plots_files/figure-gfm/unnamed-chunk-51-1.png)<!-- -->
+![](Descriptive-statistics-including-gender_files/figure-gfm/unnamed-chunk-51-1.png)<!-- -->
 
 # Negative affect low arousal
 
 **Median NAD against week**
 
 ``` r
-plot_NAD <- ggplot(data_imputed_emomeans_maxweeksg, aes(x=Week, y=NAD))
+plot_NAD <- ggplot(data_imputed_emomeans_maxweeks, aes(x=Week, y=NAD))
 
 plot_NAD +  stat_summary(geom = "line", fun = median, size=1) + stat_summary(fun.data = median_hilow, 
                                                                     fun.args = (conf.int=.5)) + expand_limits(y=c(1, 5))
 ```
 
-![](Descriptive-statistics-and-plots_files/figure-gfm/unnamed-chunk-52-1.png)<!-- -->
+![](Descriptive-statistics-including-gender_files/figure-gfm/unnamed-chunk-52-1.png)<!-- -->
 
 **Median NAD against maximum stringency in weeks**
 
 ``` r
-plot_NAD <- ggplot(data_imputed_emomeans_maxweeksg, aes(x=WeeksMax, y=NAD))
+plot_NAD <- ggplot(data_imputed_emomeans_maxweeks, aes(x=WeeksMax, y=NAD))
 
 plot_NAD +  stat_summary(geom = "line", fun = median, size=1) + stat_summary(fun.data = median_hilow, 
                                                                     fun.args = (conf.int=.5)) + expand_limits(y=c(1, 5))
 ```
 
-![](Descriptive-statistics-and-plots_files/figure-gfm/unnamed-chunk-53-1.png)<!-- -->
+![](Descriptive-statistics-including-gender_files/figure-gfm/unnamed-chunk-53-1.png)<!-- -->
 
 **Mean NAD against week in different age groups**
 
 ``` r
-plot_NAD <- ggplot(data_imputed_emomeans_maxweeksg, aes(x=Week, y=NAD, group = Age_new, color = Age_new))
+plot_NAD <- ggplot(data_imputed_emomeans_maxweeks, aes(x=Week, y=NAD, group = Age_new, color = Age_new))
 
 plot_NAD + stat_summary(fun.y=mean, geom="line", size=1) + geom_errorbar(stat="summary", fun.data="mean_se", width=0) + scale_colour_discrete(name = "Age", labels = c("18-24", "25-44", "45-64", "65+")) + expand_limits(y=c(1, 5))
 ```
 
-![](Descriptive-statistics-and-plots_files/figure-gfm/unnamed-chunk-54-1.png)<!-- -->
+![](Descriptive-statistics-including-gender_files/figure-gfm/unnamed-chunk-54-1.png)<!-- -->
 
 **Mean NAD against maximum stringency in weeks**
 
 ``` r
-plot_NAD <- ggplot(data_imputed_emomeans_maxweeksg, aes(x=WeeksMax, y=NAD))
+plot_NAD <- ggplot(data_imputed_emomeans_maxweeks, aes(x=WeeksMax, y=NAD))
 
 plot_NAD + stat_summary(fun.y=mean, geom="line", size=1) + geom_errorbar(stat="summary", fun.data="mean_se", width=0) + expand_limits(y=c(1, 5))
 ```
 
-![](Descriptive-statistics-and-plots_files/figure-gfm/unnamed-chunk-55-1.png)<!-- -->
+![](Descriptive-statistics-including-gender_files/figure-gfm/unnamed-chunk-55-1.png)<!-- -->
 
 **Mean NAD against maximum stringency in weeks in different age groups**
 
 ``` r
-plot_NAD <- ggplot(data_imputed_emomeans_maxweeksg, aes(x=WeeksMax, y=NAD, group = Age_new, color = Age_new))
+plot_NAD <- ggplot(data_imputed_emomeans_maxweeks, aes(x=WeeksMax, y=NAD, group = Age_new, color = Age_new))
 
 plot_NAD + stat_summary(fun.y=mean, geom="line", size=1) + geom_errorbar(stat="summary", fun.data="mean_se", width=0) + scale_colour_discrete(name = "Age", labels = c("18-24", "25-44", "45-64", "65+")) + expand_limits(y=c(1, 5))
 ```
 
-![](Descriptive-statistics-and-plots_files/figure-gfm/unnamed-chunk-56-1.png)<!-- -->
+![](Descriptive-statistics-including-gender_files/figure-gfm/unnamed-chunk-56-1.png)<!-- -->
 
 # Positive affect high arousal
 
 **Median PAA against week**
 
 ``` r
-plot_PAA <- ggplot(data_imputed_emomeans_maxweeksg, aes(x=Week, y=PAA))
+plot_PAA <- ggplot(data_imputed_emomeans_maxweeks, aes(x=Week, y=PAA))
 
 plot_PAA +  stat_summary(geom = "line", fun = median, size=1) + stat_summary(fun.data = median_hilow, 
                                                                     fun.args = (conf.int=.5)) + expand_limits(y=c(1, 5))
 ```
 
-![](Descriptive-statistics-and-plots_files/figure-gfm/unnamed-chunk-57-1.png)<!-- -->
+![](Descriptive-statistics-including-gender_files/figure-gfm/unnamed-chunk-57-1.png)<!-- -->
 
 **Median PAA against maximum stringency in weeks**
 
 ``` r
-plot_PAA <- ggplot(data_imputed_emomeans_maxweeksg, aes(x=WeeksMax, y=PAA))
+plot_PAA <- ggplot(data_imputed_emomeans_maxweeks, aes(x=WeeksMax, y=PAA))
 
 plot_PAA +  stat_summary(geom = "line", fun = median, size=1) + stat_summary(fun.data = median_hilow, 
                                                                     fun.args = (conf.int=.5)) + expand_limits(y=c(1, 5))
 ```
 
-![](Descriptive-statistics-and-plots_files/figure-gfm/unnamed-chunk-58-1.png)<!-- -->
+![](Descriptive-statistics-including-gender_files/figure-gfm/unnamed-chunk-58-1.png)<!-- -->
 
 **Mean PAA against week in different age groups**
 
 ``` r
-plot_PAA <- ggplot(data_imputed_emomeans_maxweeksg, aes(x=Week, y=PAA, group = Age_new, color = Age_new))
+plot_PAA <- ggplot(data_imputed_emomeans_maxweeks, aes(x=Week, y=PAA, group = Age_new, color = Age_new))
 
 plot_PAA + stat_summary(fun.y=mean, geom="line", size=1) + geom_errorbar(stat="summary", fun.data="mean_se", width=0) + scale_colour_discrete(name = "Age", labels = c("18-24", "25-44", "45-64", "65+")) + expand_limits(y=c(1, 5))
 ```
 
-![](Descriptive-statistics-and-plots_files/figure-gfm/unnamed-chunk-59-1.png)<!-- -->
+![](Descriptive-statistics-including-gender_files/figure-gfm/unnamed-chunk-59-1.png)<!-- -->
 
 **Mean PAA against maximum stringency in different age groups**
 
 ``` r
-plot_PAA <- ggplot(data_imputed_emomeans_maxweeksg, aes(x=WeeksMax, y=PAA, group = Age_new, color = Age_new))
+plot_PAA <- ggplot(data_imputed_emomeans_maxweeks, aes(x=WeeksMax, y=PAA, group = Age_new, color = Age_new))
 
 plot_PAA + stat_summary(fun.y=mean, geom="line", size=1) + geom_errorbar(stat="summary", fun.data="mean_se", width=0) + scale_colour_discrete(name = "Age", labels = c("18-24", "25-44", "45-64", "65+")) + expand_limits(y=c(1, 5))
 ```
 
-![](Descriptive-statistics-and-plots_files/figure-gfm/unnamed-chunk-60-1.png)<!-- -->
+![](Descriptive-statistics-including-gender_files/figure-gfm/unnamed-chunk-60-1.png)<!-- -->
 
 # Positive affect low arousal
 
 **Median PAD against week**
 
 ``` r
-plot_PAD <- ggplot(data_imputed_emomeans_maxweeksg, aes(x=Week, y=PAD))
+plot_PAD <- ggplot(data_imputed_emomeans_maxweeks, aes(x=Week, y=PAD))
 
 plot_PAD +  stat_summary(geom = "line", fun = median, size=1) + stat_summary(fun.data = median_hilow, 
                                                                     fun.args = (conf.int=.5)) + expand_limits(y=c(1, 5))
 ```
 
-![](Descriptive-statistics-and-plots_files/figure-gfm/unnamed-chunk-61-1.png)<!-- -->
+![](Descriptive-statistics-including-gender_files/figure-gfm/unnamed-chunk-61-1.png)<!-- -->
 
 **Median PAD against maximum stringency**
 
 ``` r
-plot_PAD <- ggplot(data_imputed_emomeans_maxweeksg, aes(x=WeeksMax, y=PAD))
+plot_PAD <- ggplot(data_imputed_emomeans_maxweeks, aes(x=WeeksMax, y=PAD))
 
 plot_PAD +  stat_summary(geom = "line", fun = median, size=1) + stat_summary(fun.data = median_hilow, 
                                                                     fun.args = (conf.int=.5)) + expand_limits(y=c(1, 5))
 ```
 
-![](Descriptive-statistics-and-plots_files/figure-gfm/unnamed-chunk-62-1.png)<!-- -->
+![](Descriptive-statistics-including-gender_files/figure-gfm/unnamed-chunk-62-1.png)<!-- -->
 
 **Mean PAD against week in different age groups**
 
 ``` r
-plot_PAD <- ggplot(data_imputed_emomeans_maxweeksg, aes(x=Week, y=PAD, group = Age_new, color = Age_new))
+plot_PAD <- ggplot(data_imputed_emomeans_maxweeks, aes(x=Week, y=PAD, group = Age_new, color = Age_new))
 
 plot_PAD + stat_summary(fun.y=mean, geom="line", size=1) + geom_errorbar(stat="summary", fun.data="mean_se", width=0) + scale_colour_discrete(name = "Age", labels = c("18-24", "25-44", "45-64", "65+")) + expand_limits(y=c(1, 5))
 ```
 
-![](Descriptive-statistics-and-plots_files/figure-gfm/unnamed-chunk-63-1.png)<!-- -->
+![](Descriptive-statistics-including-gender_files/figure-gfm/unnamed-chunk-63-1.png)<!-- -->
 
 **Mean PAD against maximum stringency in different age groups**
 
 ``` r
-plot_PAD <- ggplot(data_imputed_emomeans_maxweeksg, aes(x=WeeksMax, y=PAD, group = Age_new, color = Age_new))
+plot_PAD <- ggplot(data_imputed_emomeans_maxweeks, aes(x=WeeksMax, y=PAD, group = Age_new, color = Age_new))
 
 plot_PAD + stat_summary(fun.y=mean, geom="line", size=1) + geom_errorbar(stat="summary", fun.data="mean_se", width=0) + scale_colour_discrete(name = "Age", labels = c("18-24", "25-44", "45-64", "65+")) + expand_limits(y=c(1, 5))
 ```
 
-![](Descriptive-statistics-and-plots_files/figure-gfm/unnamed-chunk-64-1.png)<!-- -->
+![](Descriptive-statistics-including-gender_files/figure-gfm/unnamed-chunk-64-1.png)<!-- -->
