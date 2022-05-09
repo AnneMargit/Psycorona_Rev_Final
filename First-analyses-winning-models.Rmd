@@ -1,7 +1,7 @@
 ---
 title: "First analyses winning models"
 author: "Anne Margit"
-date: "12/03/2020"
+date: "05/09/2022"
 output: github_document
 ---
 
@@ -104,14 +104,14 @@ VarCorr(model_PAD10)
 
 > This model has random slopes for Stringency at the ID and Country level, assumes no correlation between random slopes and intercepts, and assumes autoregressive correlation structure at the measurement level. 
 
-
+```{r}
 stargazer(model_NAA10, model_NAD10, model_PAA10, model_PAD10,
 type="html",
-out="star_NAA10.doc",  single.row=TRUE, digits = 2, align = TRUE, 
+out="firstanalyses.doc",  single.row=TRUE, digits = 2, align = TRUE, 
 order = c("Intercept","SI", "Max SI (during)", "Max SI (after)", "SI x Max SI (during)", "SI x Max SI (after)"), 
 covariate.labels = c("Intercept","SI", "Max SI (during)", "Max SI (after)", 
 "SI x Max SI (during)", "SI x Max SI (after)"))
-
+```
 
 
 
