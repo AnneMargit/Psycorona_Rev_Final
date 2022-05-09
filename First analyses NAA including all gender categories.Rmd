@@ -1,7 +1,7 @@
 ---
 title: "First analyses NAA including all gender categories"
 author: "Anne Margit"
-date: "4/25/2022"
+date: "05/02/2022"
 output: github_document
 ---
 
@@ -15,7 +15,8 @@ Sys.getenv('R_MAX_VSIZE')
 ```
 
 ```{r, results = "hide"}
-load("data_analyse1_fg.Rdata")
+load("data_analyse1_f.Rdata")
+load("data_analyse1_fc.Rdata")
 ```
 
 This dataset includes:
@@ -53,15 +54,6 @@ library(broom.mixed)
 library(purrr)
 ```
 
-# Country mean centering Stringency Index
-```{r, results = "hide", message=F}
-data_analyse1_fcg <- gmc(data_analyse1_fg, "StringencyIndex", "Country", FUN = mean, suffix = c("_mn", "_dev"),
-    fulldataframe = TRUE)
-
-save(data_analyse1_fcg, file = "data_analyse1_fcg.Rdata")
-
-data_analyse1_fc <- data_analyse1_fcg
-```
 # Regression models
 
 **Negative affect high arousal**
@@ -91,7 +83,8 @@ summary(model_NAA2)
 model_NAA3 <- lme(fixed = NAA ~ StringencyIndex_dev + Str_dummy +  StringencyIndex_dev*Str_dummy,
                   random = ~1 | Country/ID, 
                   data = data_analyse1_fc, 
-                  na.action = na.omit)
+                  na.action = na.omit,
+                  control = list(maxIter = 100, opt = "optim"))
 
 summary(model_NAA3)
 ```
@@ -149,9 +142,11 @@ summary(model_NAA8)
 *No correlation between intercept and slope for Country and ID*
 ```{r, message=F, comment=NA}
 model_NAA9 <- lme(fixed = NAA ~ StringencyIndex_dev + Str_dummy +  StringencyIndex_dev*Str_dummy,
-                  random = list (Country = pdDiag(~StringencyIndex_dev), ID = pdDiag(~StringencyIndex_dev)),
+                  random = list (Country = pdDiag(~StringencyIndex_dev), ID =
+                                   pdDiag(~StringencyIndex_dev)),
                   data = data_analyse1_fc, 
-                  na.action = na.omit)
+                  na.action = na.omit,
+                   control = list(maxIter = 100, opt = "optim"))
 
 summary(model_NAA9)
 ```
@@ -165,7 +160,8 @@ model_NAA10 <- lme(fixed = NAA ~ StringencyIndex_dev + Str_dummy +  StringencyIn
                    random = list (Country = pdDiag(~StringencyIndex_dev), ID = pdDiag(~StringencyIndex_dev)),
                   data = data_analyse1_fc, 
                   na.action = na.omit,
-                  correlation = corAR1(form = ~ Time | Country/ID))
+                  correlation = corAR1(form = ~ Time | Country/ID),
+                   control = list(maxIter = 100, opt = "optim"))
 
 summary(model_NAA10)
 ```
