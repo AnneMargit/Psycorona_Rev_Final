@@ -1,7 +1,7 @@
 ---
-title: "NAA final including gender_tables only"
+title: "PAA final including gender_tables only"
 author: "Anne Margit"
-date: "05/09/2022"
+date: "05/16/2022"
 output: github_document
 ---
 
@@ -12,7 +12,6 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r, set-options, echo=FALSE, cache= FALSE}
 options(width=1000)
 Sys.getenv('R_MAX_VSIZE')
-options(scipen=999)
 ```
 
 ```{r, results = "hide"}
@@ -58,7 +57,7 @@ library(lattice)
 library(broom.mixed)
 library(purrr)
 library(stargazer)
-library("viridis")  
+library(viridis)
 ```
 
 # Phase 1
@@ -68,29 +67,28 @@ library("viridis")
 
 ```{r, message=F, comment=NA}
 data_analyse2_p1$Edu <- as.numeric(data_analyse2_p1$Edu)
-
-model_NAAp1 <- lme(fixed = NAA ~ Gender + Edu + Age_new,
+model_PAAp1 <- lme(fixed = PAA ~ Gender + Edu + Age_new,
                   random = ~1 | Country/ID, 
                   data = data_analyse2_p1, 
                   na.action = na.omit)
 
-summary(model_NAAp1)
-VarCorr(model_NAAp1)
+summary(model_PAAp1)
+VarCorr(model_PAAp1)
 ```
 
 *Confidence intervals*
 ```{r, message=F, comment=NA}
-intervals(model_NAAp1)
+intervals(model_PAAp1)
 ```
 
 *Plot of predicted values*
 ```{r, results = "hide", message=F}
-ef_NAAp1 <- effect("Age_new", model_NAAp1)
+ef_PAAp1 <- effect("Age_new", model_PAAp1)
 
-plot_NAAp1 <- ggplot(as.data.frame(ef_NAAp1), 
+plot_PAAp1 <- ggplot(as.data.frame(ef_PAAp1), 
   aes(Age_new, fit, color=Age_new)) + geom_line() + 
-  geom_errorbar(aes(ymin=fit-se, ymax=fit+se), width=1) + theme_minimal(base_size=12) + 
-  labs(title="NAA during tightening of restrictions", y = "NAA") +
+  geom_errorbar(aes(ymin=fit-se, ymax=fit+se), width=1) + theme_minimal(base_size=10) + 
+  labs(title="PAA during tightening of restrictions", y = "PAA") +
   theme(plot.title = element_text(hjust = 0.5)) +
   scale_x_discrete(name ="Age", labels=c("18-24", "25-44", "45-64", "65+")) +
   theme(legend.position = "none") +                 
@@ -99,86 +97,82 @@ plot_NAAp1 <- ggplot(as.data.frame(ef_NAAp1),
 ```
 
 ```{r, message=F}
-plot_NAAp1
+plot_PAAp1
 ```
 
 *Effect sizes*
 ```{r, message=F, comment=NA}
 ISDs <- data_analyse2_p1 %>% 
   group_by(ID) %>%
-  summarize_at(c("NAA"), sd, na.rm=TRUE) %>%
+  summarize_at(c("PAA"), sd, na.rm=TRUE) %>%
   ungroup()
 
 ISDs_av <- ISDs %>%
-  summarize_at(c("NAA"), mean, na.rm=TRUE) %>%
+  summarize_at(c("PAA"), mean, na.rm=TRUE) %>%
   stack() %>%
   rename(sd=values) 
 ```
 
-> Effect size = regression coefficient / average ISD of NAA
+> Effect size = regression coefficient / average ISD of PAA
 
 ```{r, message=F, comment=NA}
-coef_NAAp1 = broom.mixed::tidy(model_NAAp1, 
+coef_PAAp1 = broom.mixed::tidy(model_PAAp1, 
                effects = "fixed")
 
-coef_NAAp1 <- coef_NAAp1 %>%
-  mutate (e_size = estimate/0.4676462) %>% 
+coef_PAAp1 <- coef_PAAp1 %>%
+  mutate (e_size = estimate/0.4684283) %>% 
   mutate(across(3:8, round, 2)) 
          
 ```
 
 ```{r}
-coef_NAAp1
-coef_NAAp1 <- as.matrix(coef_NAAp1)
+coef_PAAp1
+coef_PAAp1 <- as.matrix(coef_PAAp1)
 ```
-
-> The two oldest groups report lower NAA than the youngest group. Women report higher NAA compared to men. No difference between education levels. 
 
 # Phase 2
 
 *Best model*
 
-> Random intercept for ID and Country, random slope for Country and ID, no correlation between random intercept and slope for Country, AR correlation structure at Measuement level
+> Random intercept for ID and Country, random slope for ID, no correlation between IC and S for ID + AR correlation structure at Measurement level
 
 ```{r, message=F, comment=NA}
 data_analyse2_p2$Edu <- as.numeric(data_analyse2_p2$Edu)
-
 data_analyse2_p2 <- data_analyse2_p2[with(data_analyse2_p2, order(Country, ID, Time)),]
 data_analyse2_p2$Time <- as.numeric(data_analyse2_p2$Time)
 
-model_NAAp2 <- lme(fixed = NAA ~ Gender + Edu + DaysMax_p2 + Age_new + DaysMax_p2*Age_new,
-                  random = list(Country = pdDiag(~DaysMax_p2), ID = ~DaysMax_p2),  
+model_PAAp2 <- lme(fixed = PAA ~ Gender + Edu + DaysMax_p2 + Age_new + DaysMax_p2*Age_new,
+                  random = list(Country = ~1, ID = pdDiag(~DaysMax_p2)),
                   data = data_analyse2_p2, 
                   na.action = na.omit,
-                  correlation = corAR1(form = ~ Time | Country/ID))
+                  correlation = corAR1(form = ~Time | Country/ID))
 
-summary(model_NAAp2)
-VarCorr(model_NAAp2)
+summary(model_PAAp2)
+VarCorr(model_PAAp2)
 ```
+
 *Confidence intervals*
 ```{r, message=F, comment=NA}
-intervals(model_NAAp2, which = 'fixed')
+intervals(model_PAAp2, which = 'fixed')
 ```
 
 *Plot of predicted values*
 ```{r, results = "hide", message=F}
-ef_NAAp2 <- effect("DaysMax_p2:Age_new", model_NAAp2)
+ef_PAAp2 <- effect("DaysMax_p2:Age_new", model_PAAp2)
 
-plot_NAAp2 <- ggplot(as.data.frame(ef_NAAp2), aes(DaysMax_p2, fit, color=Age_new)) + 
+plot_PAAp2 <- ggplot(as.data.frame(ef_PAAp2), aes(DaysMax_p2, fit, color=Age_new)) + 
   geom_line(size=1) + 
   geom_errorbar(aes(ymin=fit-se, ymax=fit+se), width=1) + 
-  theme_minimal(base_size=12) + 
+  theme_minimal(base_size=10) + 
   labs(title="A",
-       x="Days", y = "High-arousal negative affect") +
-  xlim(0,80)+
-  theme(plot.title = element_text(size=12)) +
+       x="Days", y = "PAA") +
+  theme(plot.title = element_text(size=10)) +
   scale_color_discrete(name="Age", labels = c("18-24", "25-44", "45-64", "65+")) + 
   expand_limits(y=c(1, 5))
-
 ```
 
 ```{r, message=F}
-plot_NAAp2
+plot_PAAp2
 ```
 
 *Effect sizes*
@@ -186,38 +180,40 @@ plot_NAAp2
 ```{r, message=F, comment=NA}
 ISDs <- data_analyse2_p2 %>% 
   group_by(ID) %>%
-  summarize_at(c("DaysMax_p2", "NAA"), sd, na.rm=TRUE) %>%
+  summarize_at(c("DaysMax_p2", "PAA"), sd, na.rm=TRUE) %>%
   ungroup()
 
 ISDs_av <- ISDs %>%
-  summarize_at(c("DaysMax_p2", "NAA"), mean, na.rm=TRUE) %>%
+  summarize_at(c("DaysMax_p2", "PAA"), mean, na.rm=TRUE) %>%
   stack() %>%
   rename(sd=values) 
 ```
 
-> Effect sizes for intercept and main effect of age and covariates = regression coefficient / average ISD of NAA
-> Effect size for main effect of DaysMax = (regression coefficient * 28)/ average ISD of NAA
-> Effect sizes for interaction effects = (regression coefficient * 28)/ average ISD of NAA
+> Effect sizes for intercept and main effect of age and covariates = regression coefficient / average ISD of PAA
+> Effect size for main effect of DaysMax = (regression coefficient * 28)/ average ISD of PAA
+> Effect sizes for interaction effects = (regression coefficient * 28)/ average ISD of PAA
 
-> The effect sizes for main effect of DaysMax and the interaction effects reflect the increase in SD of NAA over 4 weeks (28 days)
+> The effect sizes for main effect of DaysMax and the interaction effects reflect the increase in SD of PAA over 4 weeks (28 days)
 
 ```{r, message=F, comment=NA}
-coef_NAAp2 = broom.mixed::tidy(model_NAAp2, 
+coef_PAAp2 = tidy(model_PAAp2, 
                effects = "fixed")
 
-coef_NAAp2 <- coef_NAAp2 %>%
-  mutate(e_size = ifelse(row_number()== 1 | row_number()== 2 |  row_number()== 3 |  row_number()== 4 |  row_number()== 6 |  row_number()== 7 |  row_number()== 8, estimate/0.4562862, (estimate*28)/0.4562862)) %>%
+coef_PAAp2 <- coef_PAAp2 %>%
+  mutate(e_size = ifelse(row_number()== 1 | row_number()== 2 |  row_number()== 3 |  row_number()== 4 |  row_number()== 6 |  row_number()== 7 |  row_number()== 8,  estimate/0.4889919, (estimate*28)/0.4889919)) %>%
   mutate(across(3:8, round, 2)) 
           
 ```
 
 ```{r}
-coef_NAAp2 <- as.matrix(coef_NAAp2)
-coef_NAAp2
+coef_PAAp2
+coef_PAAp2 <- as.matrix(coef_PAAp2)
 ```
 
+> PAA increases over time in the youngest age group (main effect), and also increases in the older groups but more slowly (interaction effect). There are no significant differences in PAA between age groups on the first day of max stringency (main effect). Women report lower PAA compared to men, and higher educated people report higher PAA compared to lower educated people. 
+
 # Quadratic term
-The interaction between age and daysmax was not significant (linear model) so these are dropped in the current model. The time variable needs to be centered at the midpoint (mean) to reduce collinearity between the linear and the quadratic components.
+The interaction between age and daysmax was significant so these are kept in the current model. The time variable needs to be centered at the midpoint (mean) to reduce collinearity between the linear and the quadratic components.
 
 ```{r, message=F, comment=NA}
 data_analyse2_p2q <- gmc(data_analyse2_p2, "DaysMax_p2", "ID", FUN = mean, suffix = c("_mn", "_dev"),
@@ -231,7 +227,7 @@ data_analyse2_p2q$Edu <- as.numeric(data_analyse2_p2q$Edu)
 data_analyse2_p2q <- data_analyse2_p2q[with(data_analyse2_p2q, order(Country, ID, Time)),]
 data_analyse2_p2q$Time <- as.numeric(data_analyse2_p2q$Time)
 
-model_NAAp2q <- lme(fixed = NAA ~ Gender + Edu + DaysMax_p2_dev + Age_new  
+model_PAAp2q <- lme(fixed = PAA ~ Gender + Edu + DaysMax_p2_dev + Age_new + DaysMax_p2_dev*Age_new +  
                     + I(DaysMax_p2_dev^2) + I(DaysMax_p2_dev^2)*Age_new,
                   random = list(Country = pdDiag(~ DaysMax_p2_dev), 
                   ID = ~DaysMax_p2_dev),
@@ -239,146 +235,136 @@ model_NAAp2q <- lme(fixed = NAA ~ Gender + Edu + DaysMax_p2_dev + Age_new
                   na.action = na.omit,
                   correlation = corAR1(form = ~ Time | Country/ID))
 
-summary(model_NAAp2q)
-VarCorr(model_NAAp2q)
+summary(model_PAAp2q)
+VarCorr(model_PAAp2q)
 
 ```
 
-Results suggest that there is a decline of NAA over time. The quadratic effect was also significant and suggests an
-decelerated decline in NAA over time, with no evidence of differences between age groups. 
+Results suggest that there is a linear increase of PAA over time in the youngest age group and a slower increase in the older age groups. There was no significant quadratic effect.
+
 
 *Confidence intervals*
 ```{r, message=F, comment=NA}
-intervals(model_NAAp2q, which = 'fixed')
+intervals(model_PAAp2q, which = 'fixed')
 ```
 
 *Plot of predicted values*
 ```{r, results = "hide", message=F}
-ef_NAAp2q <- effect("Age_new:I(DaysMax_p2_dev^2)", model_NAAp2q)
+ef_PAAp2q <- effect("Age_new:I(DaysMax_p2_dev^2)", model_PAAp2q)
 
-plot_NAAp2q <- ggplot(as.data.frame(ef_NAAp2q), aes(DaysMax_p2_dev, fit, color=Age_new)) + 
+plot_PAAp2q <- ggplot(as.data.frame(ef_PAAp2q), aes(DaysMax_p2_dev, fit, color=Age_new)) + 
   geom_line(size=1) + 
   geom_errorbar(aes(ymin=fit-se, ymax=fit+se), width=1) + 
   theme_minimal(base_size=10) + 
-  labs(title="Quadratic NAA trajectories during peak restrictions",
-       x="Days (centered)", y = "NAA") +
-  theme(plot.title = element_text(hjust = 0.5, size=10)) +
+  labs(title="Quadratic PAA trajectories during peak restrictions",
+       x="Days  (centered)", y = "PAA") +
+  theme(plot.title = element_text(hjust = 0.5)) +
   scale_color_discrete(name="Age", labels = c("18-24", "25-44", "45-64", "65+")) + 
   expand_limits(y=c(1, 5))
 ```
 
 ```{r, message=F}
-plot_NAAp2q
+plot_PAAp2q
 ```
-
 
 # Phase 3
 
+> Random: IC for ID and Country, S for ID, no correlation between IC and S for ID + AR
+
 ```{r, message=F, comment=NA}
 data_analyse2_p3$Edu <- as.numeric(data_analyse2_p3$Edu)
-
 data_analyse2_p3 <- data_analyse2_p3[with(data_analyse2_p3, order(Country, ID, Time)),]
 data_analyse2_p3$Time <- as.numeric(data_analyse2_p3$Time)
 
-model_NAAp3 <- lme(fixed = NAA ~ Gender + Edu + DaysPhase3 + Age_new + DaysPhase3*Age_new,
-                  random = list (Country = ~1, ID = ~DaysPhase3), 
+model_PAAp3 <- lme(fixed = PAA ~ Gender + Edu + DaysPhase3 + Age_new + DaysPhase3*Age_new,
+                  random = list (Country = ~1, ID = pdDiag(~DaysPhase3)), 
                   data = data_analyse2_p3, 
                   na.action = na.omit,
                   correlation = corAR1(form = ~ Time | Country/ID))
 
-summary(model_NAAp3)
-VarCorr(model_NAAp3)
+summary(model_PAAp3)
+VarCorr(model_PAAp3)
 ```
-
-> Random intercept for ID and Country, random slope for ID and AR correlation structure at Measurement level
 
 *Confidence intervals*
 ```{r, message=F, comment=NA}
-intervals(model_NAAp3, which = 'fixed')
+intervals(model_PAAp3, which = 'fixed')
 ```
 
 *Plot of predicted values*
 ```{r, results = "hide", message=F}
-ef_NAAp3 <- effect("DaysPhase3:Age_new", model_NAAp3)
+ef_PAAp3 <- effect("DaysPhase3:Age_new", model_PAAp3)
 
-plot_NAAp3 <- ggplot(as.data.frame(ef_NAAp3), aes(DaysPhase3, fit, color=Age_new)) + 
+plot_PAAp3 <- ggplot(as.data.frame(ef_PAAp3), aes(DaysPhase3, fit, color=Age_new)) + 
   geom_line(size=1) + 
   geom_errorbar(aes(ymin=fit-se, ymax=fit+se), width=1) + 
   theme_minimal(base_size=10) + 
-  xlim(0,80)+
   labs(title="B",
-       x="Days", y = "NAA") +
-  theme(plot.title = element_text(size = 10)) +
+       x="Days", y = "PAA") +
+  theme(plot.title = element_text(size=10)) +
   scale_color_discrete(name="Age", labels = c("18-24", "25-44", "45-64", "65+")) + 
   expand_limits(y=c(1, 5))
-
 ```
 
 ```{r, message=F}
-plot_NAAp3
+plot_PAAp3
 ```
 
-
-
 ```{r, message=F}
-plot_NAAp2and3 <- ggarrange(plot_NAAp2, plot_NAAp3 , 
+plot_PAAp2and3 <- ggarrange(plot_PAAp2, plot_PAAp3 , 
           ncol = 2, nrow = 1, common.legend=TRUE, legend= "bottom")
 
-plot_NAAp2and3 <- annotate_figure(plot_NAAp2and3,top = text_grob("NAA trajectories during peak (A) and easing (B) of restrictions", size = 12))
+plot_PAAp2and3 <- annotate_figure(plot_PAAp2and3,top = text_grob("PAA trajectories during peak (A) and easing (B) of restrictions", size = 12))
   
   
 ```
-
 ```{r, message=F}
-plot_NAAp2and3
+plot_PAAp2and3
   
 ```
 
 *Effect sizes*
-**Within person SD and average within person SD for NAA**
+**Within person SD and average within person SD for PAA**
 ```{r, message=F, comment=NA}
 ISDs <- data_analyse2_p3 %>% 
   group_by(ID) %>%
-  summarize_at(c("NAA"), sd, na.rm=TRUE) %>%
+  summarize_at(c("PAA"), sd, na.rm=TRUE) %>%
   ungroup()
 
 ISDs_av <- ISDs %>%
-  summarize_at(c("NAA"), mean, na.rm=TRUE) %>%
+  summarize_at(c("PAA"), mean, na.rm=TRUE) %>%
   stack() %>%
   rename(sd=values) 
 ```
 
-> Effect sizes for intercept and main effect of age = regression coefficient / average ISD of NAA
-> Effect size for main effect of DaysMax = (regression coefficient * 28)/ average ISD of NAA
-> Effect sizes for interaction effects = (regression coefficient * 28)/ average ISD of NAA
+> Effect sizes for intercept and main effect of age = regression coefficient / average ISD of PAA
+> Effect size for main effect of DaysMax = (regression coefficient * 28)/ average ISD of PAA
+> Effect sizes for interaction effects = (regression coefficient * 28)/ average ISD of PAA
 
-> The effect sizes for main effect of DaysMax and the interaction effects reflect the increase in SD of NAA over 4 weeks (28 days)
+> The effect sizes for main effect of DaysMax and the interaction effects reflect the increase in SD of PAA over 4 weeks (28 days)
 
 ```{r, message=F, comment=NA}
-coef_NAAp3 = broom.mixed::tidy(model_NAAp3, 
+coef_PAAp3 = broom.mixed::tidy(model_PAAp3, 
                effects = "fixed")
 
-coef_NAAp3 <- coef_NAAp3 %>%
- mutate(e_size = ifelse(row_number()== 1 | row_number()== 2 |  row_number()== 3 |  row_number()== 4 |  row_number()== 6 |  row_number()== 7 |  row_number()== 8, estimate/0.421019, (estimate*28)/0.421019)) %>%
+coef_PAAp3 <- coef_PAAp3 %>%
+ mutate(e_size = ifelse(row_number()== 1 | row_number()== 2 |  row_number()== 3 |  row_number()== 4 |  row_number()== 6 |  row_number()== 7 |  row_number()== 8,  estimate/0.4894116, (estimate*28)/0.4894116)) %>%
   mutate(across(3:8, round, 2)) 
 ```
 
 ```{r}
-coef_NAAp3 <- as.matrix(coef_NAAp3)
-coef_NAAp3
+coef_PAAp3
+coef_PAAp3 <- as.matrix(coef_PAAp3)
 ```
 
-> Older people report lower NAA compared to younger people on the first day stringency reduces after the peak (main effect), there is no change over time in NAA for the youngest group, but the middle aged group (45-64) reports decreasing NAA over time (interaction effect). This trend is visible for the other age groups as well in the plot but not significant. 
+> PAA increases over time in the youngest group (main effect) and older groups with the same degree (interaction effect). There are no age differences in PAA on the first day stringency reduces again after the peak (main effect). Women report lower PAA, two higher educated groups report higher PAA. 
 
 
 ```{r}
-stargazer(coef_NAAp1, coef_NAAp2, coef_NAAp3,
-type="html", df = TRUE, out="star_coefallphase_NAA.doc",  single.row=TRUE, digits = 3, align = TRUE)
+stargazer(coef_PAAp1, coef_PAAp2, coef_PAAp3,
+type="html", df = TRUE, out="star_coefallphase_PAA.doc",  single.row=TRUE, digits = 3, align = TRUE)
 
-stargazer(model_NAAp1, model_NAAp2, model_NAAp2q, model_NAAp3,
-type="html", df = TRUE, out="starallphasesNAA.doc",  single.row=TRUE, digits = 3, align = TRUE,
+stargazer(model_PAAp1, model_PAAp2, model_PAAp2q, model_PAAp3,
+type="html", df = TRUE, out="starallphasesPAA.doc",  single.row=TRUE, digits = 3, align = TRUE,
 intercept.top = TRUE, intercept.bottom = FALSE)
-
 ```
-
-

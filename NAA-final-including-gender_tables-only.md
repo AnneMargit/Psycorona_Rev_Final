@@ -11,6 +11,8 @@ load("data_analyse2_p2.Rdata")
 load("data_analyse2_p3.Rdata")
 
 levels(data_analyse2_p1$Gender) <- c("M", "F", "O")
+levels(data_analyse2_p2$Gender) <- c("M", "F", "O")
+levels(data_analyse2_p3$Gender) <- c("M", "F", "O")
 ```
 
 This dataset includes:
@@ -59,127 +61,6 @@ library(purrr)
 library(stargazer)
 library("viridis")  
 ```
-
-# Descriptives
-
-**Number of participants per age group**
-
-> 0 = 18-24, 1 = 25-44, 3= 45-64, 4= 65+
-
-Phase 1
-
-``` r
-data_analyse2_p1 %>%
-  group_by(Age_new) %>%
-  summarise(NAge = n())
-```
-
-    # A tibble: 4 × 2
-      Age_new  NAge
-      <fct>   <int>
-    1 0         704
-    2 1        1906
-    3 2        1274
-    4 3         293
-
-Phase 2
-
-``` r
-data_analyse2_p2 %>%
-  group_by(Age_new) %>%
-  summarise(NAge = n())
-```
-
-    # A tibble: 4 × 2
-      Age_new  NAge
-      <fct>   <int>
-    1 0        3741
-    2 1       11413
-    3 2       10269
-    4 3        4370
-
-Phase 3
-
-``` r
-data_analyse2_p2 %>%
-  group_by(Age_new) %>%
-  summarise(NAge = n())
-```
-
-    # A tibble: 4 × 2
-      Age_new  NAge
-      <fct>   <int>
-    1 0        3741
-    2 1       11413
-    3 2       10269
-    4 3        4370
-
-**Plots** **Mean NAA against max stringency in WEEKS** Phase 1 (only age
-differences)
-
-``` r
-plot_NAA1 <- ggplot(data_analyse2_p1, aes(x=Age_new, y=NAA, fill= Age_new))
-
-plot_NAA1 + geom_boxplot() +
-   theme_minimal(base_size=12) +
-   expand_limits(y=c(1, 5)) +
-   theme(legend.position = "none") + 
-   scale_x_discrete(labels= c("18-24", "25-44", "45-64", "65+")) +
-   labs(title= "High-arousal negative affect", x = "Age", y="Mean NA") +
-   theme(axis.title.y = element_text(vjust = 3), plot.title=element_text(hjust=0.5))  
-```
-
-![](NAA-final-including-gender_tables-only_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
-
-``` r
-plot_NAA1 + stat_summary(fun.y=mean, geom="line", size=1)  + 
-   theme_minimal(base_size=12) + 
-  geom_histogram(stat="summary", fun.data="mean_se", width=0.5) + 
-  scale_color_discrete(name = "Age", labels = c("18-24", "25-44", "45-64", "65+")) + expand_limits(y=c(1, 5)) +
-  xlab("Age")
-```
-
-![](NAA-final-including-gender_tables-only_files/figure-gfm/unnamed-chunk-6-2.png)<!-- -->
-
-Phase 2
-
-``` r
-plot_NAA2 <- ggplot(data_analyse2_p2, aes(x=WeeksMax_p2, y=NAA, group = Age_new, color = Age_new))
-
-plot_NAA2 + stat_summary(fun.y=mean, geom="line", size=1)  + geom_errorbar(stat="summary", fun.data="mean_se", width=0) + scale_colour_discrete(name = "Age", labels = c("18-24", "25-44", "45-64", "65+")) + expand_limits(y=c(1, 5))
-```
-
-![](NAA-final-including-gender_tables-only_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
-
-Phase 3
-
-``` r
-plot_NAA3 <- ggplot(data_analyse2_p3, aes(x=WeeksPhase3, y=NAA, group = Age_new, color = Age_new))
-
-plot_NAA3 + stat_summary(fun.y=mean, geom="line", size=1)  + geom_errorbar(stat="summary", fun.data="mean_se", width=0) + scale_colour_discrete(name = "Age", labels = c("18-24", "25-44", "45-64", "65+")) + expand_limits(y=c(1, 5))
-```
-
-![](NAA-final-including-gender_tables-only_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
-
-**Mean NAA against max stringency in DAYS** Phase 2
-
-``` r
-plot_NAA2 <- ggplot(data_analyse2_p2, aes(x=DaysMax_p2, y=NAA, group = Age_new, color = Age_new))
-
-plot_NAA2 + stat_summary(fun.y=mean, geom="line", size=1)  + geom_errorbar(stat="summary", fun.data="mean_se", width=0) + scale_colour_discrete(name = "Age", labels = c("18-24", "25-44", "45-64", "65+")) + expand_limits(y=c(1, 5))
-```
-
-![](NAA-final-including-gender_tables-only_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
-
-Phase 3
-
-``` r
-plot_NAA3 <- ggplot(data_analyse2_p3, aes(x=DaysPhase3, y=NAA, group = Age_new, color = Age_new))
-
-plot_NAA3 + stat_summary(fun.y=mean, geom="line", size=1)  + geom_errorbar(stat="summary", fun.data="mean_se", width=0) + scale_colour_discrete(name = "Age", labels = c("18-24", "25-44", "45-64", "65+")) + expand_limits(y=c(1, 5))
-```
-
-![](NAA-final-including-gender_tables-only_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
 # Phase 1
 
@@ -302,7 +183,7 @@ plot_NAAp1 <- ggplot(as.data.frame(ef_NAAp1),
 plot_NAAp1
 ```
 
-![](NAA-final-including-gender_tables-only_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+![](NAA-final-including-gender_tables-only_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
 *Effect sizes*
 
@@ -401,8 +282,8 @@ summary(model_NAAp2)
     Fixed effects:  NAA ~ Gender + Edu + DaysMax_p2 + Age_new + DaysMax_p2 * Age_new 
                              Value  Std.Error    DF   t-value p-value
     (Intercept)          2.5065398 0.05677345 20515  44.14986  0.0000
-    Gender1              0.1864606 0.01876065  9221   9.93892  0.0000
-    Gender3              0.4683953 0.11976325  9221   3.91101  0.0001
+    GenderF              0.1864606 0.01876065  9221   9.93892  0.0000
+    GenderO              0.4683953 0.11976325  9221   3.91101  0.0001
     Edu                 -0.0121373 0.00614522  9221  -1.97508  0.0483
     DaysMax_p2          -0.0054330 0.00126459 20515  -4.29628  0.0000
     Age_new1             0.0040825 0.03588408  9221   0.11377  0.9094
@@ -412,9 +293,9 @@ summary(model_NAAp2)
     DaysMax_p2:Age_new2 -0.0012321 0.00105073 20515  -1.17262  0.2410
     DaysMax_p2:Age_new3 -0.0006285 0.00120605 20515  -0.52115  0.6023
      Correlation: 
-                        (Intr) Gendr1 Gendr3 Edu    DysM_2 Ag_nw1 Ag_nw2 Ag_nw3 DM_2:A_1 DM_2:A_2
-    Gender1             -0.249                                                                   
-    Gender3             -0.056  0.117                                                            
+                        (Intr) GendrF GendrO Edu    DysM_2 Ag_nw1 Ag_nw2 Ag_nw3 DM_2:A_1 DM_2:A_2
+    GenderF             -0.249                                                                   
+    GenderO             -0.056  0.117                                                            
     Edu                 -0.407 -0.030  0.003                                                     
     DaysMax_p2          -0.240  0.004 -0.008 -0.006                                              
     Age_new1            -0.342  0.044  0.018 -0.218  0.331                                       
@@ -457,8 +338,8 @@ intervals(model_NAAp2, which = 'fixed')
      Fixed effects:
                                lower          est.          upper
     (Intercept)          2.395259348  2.5065398285  2.61782030871
-    Gender1              0.149685552  0.1864605787  0.22323560497
-    Gender3              0.233632800  0.4683952797  0.70315775903
+    GenderF              0.149685552  0.1864605787  0.22323560497
+    GenderO              0.233632800  0.4683952797  0.70315775903
     Edu                 -0.024183275 -0.0121372895 -0.00009130387
     DaysMax_p2          -0.007911750 -0.0054330461 -0.00295434192
     Age_new1            -0.066258266  0.0040824804  0.07442322688
@@ -489,7 +370,7 @@ plot_NAAp2 <- ggplot(as.data.frame(ef_NAAp2), aes(DaysMax_p2, fit, color=Age_new
 plot_NAAp2
 ```
 
-![](NAA-final-including-gender_tables-only_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
+![](NAA-final-including-gender_tables-only_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
 
 *Effect sizes* **Within person SD and average within person SD**
 
@@ -520,7 +401,7 @@ coef_NAAp2 = broom.mixed::tidy(model_NAAp2,
 
 coef_NAAp2 <- coef_NAAp2 %>%
   mutate(e_size = ifelse(row_number()== 1 | row_number()== 2 |  row_number()== 3 |  row_number()== 4 |  row_number()== 6 |  row_number()== 7 |  row_number()== 8, estimate/0.4562862, (estimate*28)/0.4562862)) %>%
-  mutate(across(3:7, round, 2)) 
+  mutate(across(3:8, round, 2)) 
 ```
 
 ``` r
@@ -528,18 +409,18 @@ coef_NAAp2 <- as.matrix(coef_NAAp2)
 coef_NAAp2
 ```
 
-    ##       effect  term                  estimate std.error df      statistic p.value e_size        
-    ##  [1,] "fixed" "(Intercept)"         " 2.51"  "0.06"    "20515" " 44.15"  "0.00"  " 5.493350070"
-    ##  [2,] "fixed" "Gender1"             " 0.19"  "0.02"    " 9221" "  9.94"  "0.00"  " 0.408648297"
-    ##  [3,] "fixed" "Gender3"             " 0.47"  "0.12"    " 9221" "  3.91"  "0.00"  " 1.026538343"
-    ##  [4,] "fixed" "Edu"                 "-0.01"  "0.01"    " 9221" " -1.98"  "0.05"  "-0.026600168"
-    ##  [5,] "fixed" "DaysMax_p2"          "-0.01"  "0.00"    "20515" " -4.30"  "0.00"  "-0.333398841"
-    ##  [6,] "fixed" "Age_new1"            " 0.00"  "0.04"    " 9221" "  0.11"  "0.91"  " 0.008947192"
-    ##  [7,] "fixed" "Age_new2"            "-0.22"  "0.04"    " 9221" " -5.99"  "0.00"  "-0.485069664"
-    ##  [8,] "fixed" "Age_new3"            "-0.49"  "0.04"    " 9221" "-10.99"  "0.00"  "-1.077337894"
-    ##  [9,] "fixed" "DaysMax_p2:Age_new1" " 0.00"  "0.00"    "20515" " -1.72"  "0.09"  "-0.108165115"
-    ## [10,] "fixed" "DaysMax_p2:Age_new2" " 0.00"  "0.00"    "20515" " -1.17"  "0.24"  "-0.075607950"
-    ## [11,] "fixed" "DaysMax_p2:Age_new3" " 0.00"  "0.00"    "20515" " -0.52"  "0.60"  "-0.038569478"
+    ##       effect  term                  estimate std.error df      statistic p.value e_size 
+    ##  [1,] "fixed" "(Intercept)"         " 2.51"  "0.06"    "20515" " 44.15"  "0.00"  " 5.49"
+    ##  [2,] "fixed" "GenderF"             " 0.19"  "0.02"    " 9221" "  9.94"  "0.00"  " 0.41"
+    ##  [3,] "fixed" "GenderO"             " 0.47"  "0.12"    " 9221" "  3.91"  "0.00"  " 1.03"
+    ##  [4,] "fixed" "Edu"                 "-0.01"  "0.01"    " 9221" " -1.98"  "0.05"  "-0.03"
+    ##  [5,] "fixed" "DaysMax_p2"          "-0.01"  "0.00"    "20515" " -4.30"  "0.00"  "-0.33"
+    ##  [6,] "fixed" "Age_new1"            " 0.00"  "0.04"    " 9221" "  0.11"  "0.91"  " 0.01"
+    ##  [7,] "fixed" "Age_new2"            "-0.22"  "0.04"    " 9221" " -5.99"  "0.00"  "-0.49"
+    ##  [8,] "fixed" "Age_new3"            "-0.49"  "0.04"    " 9221" "-10.99"  "0.00"  "-1.08"
+    ##  [9,] "fixed" "DaysMax_p2:Age_new1" " 0.00"  "0.00"    "20515" " -1.72"  "0.09"  "-0.11"
+    ## [10,] "fixed" "DaysMax_p2:Age_new2" " 0.00"  "0.00"    "20515" " -1.17"  "0.24"  "-0.08"
+    ## [11,] "fixed" "DaysMax_p2:Age_new3" " 0.00"  "0.00"    "20515" " -0.52"  "0.60"  "-0.04"
 
 # Quadratic term
 
@@ -596,8 +477,8 @@ summary(model_NAAp2q)
     Fixed effects:  NAA ~ Gender + Edu + DaysMax_p2_dev + Age_new + I(DaysMax_p2_dev^2) +      I(DaysMax_p2_dev^2) * Age_new 
                                       Value  Std.Error    DF   t-value p-value
     (Intercept)                   2.4193880 0.05299318 20514  45.65471  0.0000
-    Gender1                       0.1801976 0.01875057  9221   9.61025  0.0000
-    Gender3                       0.4636293 0.11919543  9221   3.88966  0.0001
+    GenderF                       0.1801976 0.01875057  9221   9.61025  0.0000
+    GenderO                       0.4636293 0.11919543  9221   3.88966  0.0001
     Edu                          -0.0116005 0.00613134  9221  -1.89200  0.0585
     DaysMax_p2_dev               -0.0067445 0.00109911 20514  -6.13633  0.0000
     Age_new1                     -0.0390229 0.03002496  9221  -1.29968  0.1937
@@ -608,9 +489,9 @@ summary(model_NAAp2q)
     Age_new2:I(DaysMax_p2_dev^2)  0.0000381 0.00005368 20514   0.70923  0.4782
     Age_new3:I(DaysMax_p2_dev^2)  0.0000235 0.00006008 20514   0.39140  0.6955
      Correlation: 
-                                 (Intr) Gendr1 Gendr3 Edu    DyM_2_ Ag_nw1 Ag_nw2 Ag_nw3 I(DM_2 A_1:I( A_2:I(
-    Gender1                      -0.265                                                                      
-    Gender3                      -0.062  0.117                                                               
+                                 (Intr) GendrF GendrO Edu    DyM_2_ Ag_nw1 Ag_nw2 Ag_nw3 I(DM_2 A_1:I( A_2:I(
+    GenderF                      -0.265                                                                      
+    GenderO                      -0.062  0.117                                                               
     Edu                          -0.437 -0.031  0.003                                                        
     DaysMax_p2_dev                0.003  0.000  0.000  0.001                                                 
     Age_new1                     -0.283  0.055  0.027 -0.245  0.000                                          
@@ -658,8 +539,8 @@ intervals(model_NAAp2q, which = 'fixed')
      Fixed effects:
                                           lower           est.         upper
     (Intercept)                   2.31551715879  2.41938800320  2.5232588476
-    Gender1                       0.14344230316  0.18019756510  0.2169528270
-    Gender3                       0.22997987653  0.46362928681  0.6972786971
+    GenderF                       0.14344230316  0.18019756510  0.2169528270
+    GenderO                       0.22997987653  0.46362928681  0.6972786971
     Edu                          -0.02361927740 -0.01160048470  0.0004183080
     DaysMax_p2_dev               -0.00889885109 -0.00674450759 -0.0045901641
     Age_new1                     -0.09787847359 -0.03902290058  0.0198326724
@@ -690,7 +571,7 @@ plot_NAAp2q <- ggplot(as.data.frame(ef_NAAp2q), aes(DaysMax_p2_dev, fit, color=A
 plot_NAAp2q
 ```
 
-![](NAA-final-including-gender_tables-only_files/figure-gfm/unnamed-chunk-29-1.png)<!-- -->
+![](NAA-final-including-gender_tables-only_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
 
 # Phase 3
 
@@ -734,8 +615,8 @@ summary(model_NAAp3)
     Fixed effects:  NAA ~ Gender + Edu + DaysPhase3 + Age_new + DaysPhase3 * Age_new 
                              Value  Std.Error    DF   t-value p-value
     (Intercept)          2.4955433 0.05816876 18008  42.90178  0.0000
-    Gender1              0.1198719 0.02145620  7031   5.58682  0.0000
-    Gender3              0.2578240 0.17226170  7031   1.49670  0.1345
+    GenderF              0.1198719 0.02145620  7031   5.58682  0.0000
+    GenderO              0.2578240 0.17226170  7031   1.49670  0.1345
     Edu                 -0.0171693 0.00712445  7031  -2.40991  0.0160
     DaysPhase3          -0.0012916 0.00097308 18008  -1.32729  0.1844
     Age_new1            -0.1037214 0.04033413  7031  -2.57155  0.0101
@@ -745,9 +626,9 @@ summary(model_NAAp3)
     DaysPhase3:Age_new2 -0.0023033 0.00109102 18008  -2.11112  0.0348
     DaysPhase3:Age_new3 -0.0018066 0.00120804 18008  -1.49546  0.1348
      Correlation: 
-                        (Intr) Gendr1 Gendr3 Edu    DysPh3 Ag_nw1 Ag_nw2 Ag_nw3 DP3:A_1 DP3:A_2
-    Gender1             -0.287                                                                 
-    Gender3             -0.056  0.095                                                          
+                        (Intr) GendrF GendrO Edu    DysPh3 Ag_nw1 Ag_nw2 Ag_nw3 DP3:A_1 DP3:A_2
+    GenderF             -0.287                                                                 
+    GenderO             -0.056  0.095                                                          
     Edu                 -0.461 -0.027  0.003                                                   
     DaysPhase3          -0.297 -0.002 -0.007 -0.006                                            
     Age_new1            -0.381  0.050  0.015 -0.220  0.435                                     
@@ -792,8 +673,8 @@ intervals(model_NAAp3, which = 'fixed')
      Fixed effects:
                                lower         est.         upper
     (Intercept)          2.381526991  2.495543333  2.6095596754
-    Gender1              0.077811238  0.119871862  0.1619324859
-    Gender3             -0.079860851  0.257824002  0.5955088554
+    GenderF              0.077811238  0.119871862  0.1619324859
+    GenderO             -0.079860851  0.257824002  0.5955088554
     Edu                 -0.031135352 -0.017169292 -0.0032032314
     DaysPhase3          -0.003198899 -0.001291562  0.0006157744
     Age_new1            -0.182788424 -0.103721364 -0.0246543036
@@ -826,7 +707,7 @@ plot_NAAp3
 
     ## Warning: Removed 4 row(s) containing missing values (geom_path).
 
-![](NAA-final-including-gender_tables-only_files/figure-gfm/unnamed-chunk-33-1.png)<!-- -->
+![](NAA-final-including-gender_tables-only_files/figure-gfm/unnamed-chunk-25-1.png)<!-- -->
 
 ``` r
 plot_NAAp2and3 <- ggarrange(plot_NAAp2, plot_NAAp3 , 
@@ -843,7 +724,7 @@ plot_NAAp2and3 <- annotate_figure(plot_NAAp2and3,top = text_grob("NAA trajectori
 plot_NAAp2and3
 ```
 
-![](NAA-final-including-gender_tables-only_files/figure-gfm/unnamed-chunk-35-1.png)<!-- -->
+![](NAA-final-including-gender_tables-only_files/figure-gfm/unnamed-chunk-27-1.png)<!-- -->
 
 *Effect sizes* **Within person SD and average within person SD for NAA**
 
@@ -874,7 +755,7 @@ coef_NAAp3 = broom.mixed::tidy(model_NAAp3,
 
 coef_NAAp3 <- coef_NAAp3 %>%
  mutate(e_size = ifelse(row_number()== 1 | row_number()== 2 |  row_number()== 3 |  row_number()== 4 |  row_number()== 6 |  row_number()== 7 |  row_number()== 8, estimate/0.421019, (estimate*28)/0.421019)) %>%
-  mutate(across(3:7, round, 2)) 
+  mutate(across(3:8, round, 2)) 
 ```
 
 ``` r
@@ -882,18 +763,18 @@ coef_NAAp3 <- as.matrix(coef_NAAp3)
 coef_NAAp3
 ```
 
-    ##       effect  term                  estimate std.error df      statistic p.value e_size       
-    ##  [1,] "fixed" "(Intercept)"         " 2.50"  "0.06"    "18008" " 42.90"  "0.00"  " 5.92738887"
-    ##  [2,] "fixed" "Gender1"             " 0.12"  "0.02"    " 7031" "  5.59"  "0.00"  " 0.28471841"
-    ##  [3,] "fixed" "Gender3"             " 0.26"  "0.17"    " 7031" "  1.50"  "0.13"  " 0.61238092"
-    ##  [4,] "fixed" "Edu"                 "-0.02"  "0.01"    " 7031" " -2.41"  "0.02"  "-0.04078033"
-    ##  [5,] "fixed" "DaysPhase3"          " 0.00"  "0.00"    "18008" " -1.33"  "0.18"  "-0.08589576"
-    ##  [6,] "fixed" "Age_new1"            "-0.10"  "0.04"    " 7031" " -2.57"  "0.01"  "-0.24635792"
-    ##  [7,] "fixed" "Age_new2"            "-0.32"  "0.04"    " 7031" " -8.12"  "0.00"  "-0.76625821"
-    ##  [8,] "fixed" "Age_new3"            "-0.61"  "0.05"    " 7031" "-13.48"  "0.00"  "-1.45987685"
-    ##  [9,] "fixed" "DaysPhase3:Age_new1" " 0.00"  "0.00"    "18008" " -1.43"  "0.15"  "-0.10679307"
-    ## [10,] "fixed" "DaysPhase3:Age_new2" " 0.00"  "0.00"    "18008" " -2.11"  "0.03"  "-0.15318034"
-    ## [11,] "fixed" "DaysPhase3:Age_new3" " 0.00"  "0.00"    "18008" " -1.50"  "0.13"  "-0.12014699"
+    ##       effect  term                  estimate std.error df      statistic p.value e_size 
+    ##  [1,] "fixed" "(Intercept)"         " 2.50"  "0.06"    "18008" " 42.90"  "0.00"  " 5.93"
+    ##  [2,] "fixed" "GenderF"             " 0.12"  "0.02"    " 7031" "  5.59"  "0.00"  " 0.28"
+    ##  [3,] "fixed" "GenderO"             " 0.26"  "0.17"    " 7031" "  1.50"  "0.13"  " 0.61"
+    ##  [4,] "fixed" "Edu"                 "-0.02"  "0.01"    " 7031" " -2.41"  "0.02"  "-0.04"
+    ##  [5,] "fixed" "DaysPhase3"          " 0.00"  "0.00"    "18008" " -1.33"  "0.18"  "-0.09"
+    ##  [6,] "fixed" "Age_new1"            "-0.10"  "0.04"    " 7031" " -2.57"  "0.01"  "-0.25"
+    ##  [7,] "fixed" "Age_new2"            "-0.32"  "0.04"    " 7031" " -8.12"  "0.00"  "-0.77"
+    ##  [8,] "fixed" "Age_new3"            "-0.61"  "0.05"    " 7031" "-13.48"  "0.00"  "-1.46"
+    ##  [9,] "fixed" "DaysPhase3:Age_new1" " 0.00"  "0.00"    "18008" " -1.43"  "0.15"  "-0.11"
+    ## [10,] "fixed" "DaysPhase3:Age_new2" " 0.00"  "0.00"    "18008" " -2.11"  "0.03"  "-0.15"
+    ## [11,] "fixed" "DaysPhase3:Age_new3" " 0.00"  "0.00"    "18008" " -1.50"  "0.13"  "-0.12"
 
 > Older people report lower NAA compared to younger people on the first
 > day stringency reduces after the peak (main effect), there is no
@@ -919,31 +800,31 @@ type="html", df = TRUE, out="star_coefallphase_NAA.doc",  single.row=TRUE, digit
     ## <tr><td colspan="8" style="border-bottom: 1px solid black"></td></tr></table>
     ## 
     ## <table style="text-align:center"><tr><td colspan="8" style="border-bottom: 1px solid black"></td></tr><tr><td>effect</td><td>term</td><td>estimate</td><td>std.error</td><td>df</td><td>statistic</td><td>p.value</td><td>e_size</td></tr>
-    ## <tr><td colspan="8" style="border-bottom: 1px solid black"></td></tr><tr><td>fixed</td><td>(Intercept)</td><td>2.51</td><td>0.06</td><td>20515</td><td>44.15</td><td>0.00</td><td>5.493350070</td></tr>
-    ## <tr><td>fixed</td><td>Gender1</td><td>0.19</td><td>0.02</td><td>9221</td><td>9.94</td><td>0.00</td><td>0.408648297</td></tr>
-    ## <tr><td>fixed</td><td>Gender3</td><td>0.47</td><td>0.12</td><td>9221</td><td>3.91</td><td>0.00</td><td>1.026538343</td></tr>
-    ## <tr><td>fixed</td><td>Edu</td><td>-0.01</td><td>0.01</td><td>9221</td><td>-1.98</td><td>0.05</td><td>-0.026600168</td></tr>
-    ## <tr><td>fixed</td><td>DaysMax_p2</td><td>-0.01</td><td>0.00</td><td>20515</td><td>-4.30</td><td>0.00</td><td>-0.333398841</td></tr>
-    ## <tr><td>fixed</td><td>Age_new1</td><td>0.00</td><td>0.04</td><td>9221</td><td>0.11</td><td>0.91</td><td>0.008947192</td></tr>
-    ## <tr><td>fixed</td><td>Age_new2</td><td>-0.22</td><td>0.04</td><td>9221</td><td>-5.99</td><td>0.00</td><td>-0.485069664</td></tr>
-    ## <tr><td>fixed</td><td>Age_new3</td><td>-0.49</td><td>0.04</td><td>9221</td><td>-10.99</td><td>0.00</td><td>-1.077337894</td></tr>
-    ## <tr><td>fixed</td><td>DaysMax_p2:Age_new1</td><td>0.00</td><td>0.00</td><td>20515</td><td>-1.72</td><td>0.09</td><td>-0.108165115</td></tr>
-    ## <tr><td>fixed</td><td>DaysMax_p2:Age_new2</td><td>0.00</td><td>0.00</td><td>20515</td><td>-1.17</td><td>0.24</td><td>-0.075607950</td></tr>
-    ## <tr><td>fixed</td><td>DaysMax_p2:Age_new3</td><td>0.00</td><td>0.00</td><td>20515</td><td>-0.52</td><td>0.60</td><td>-0.038569478</td></tr>
+    ## <tr><td colspan="8" style="border-bottom: 1px solid black"></td></tr><tr><td>fixed</td><td>(Intercept)</td><td>2.51</td><td>0.06</td><td>20515</td><td>44.15</td><td>0.00</td><td>5.49</td></tr>
+    ## <tr><td>fixed</td><td>GenderF</td><td>0.19</td><td>0.02</td><td>9221</td><td>9.94</td><td>0.00</td><td>0.41</td></tr>
+    ## <tr><td>fixed</td><td>GenderO</td><td>0.47</td><td>0.12</td><td>9221</td><td>3.91</td><td>0.00</td><td>1.03</td></tr>
+    ## <tr><td>fixed</td><td>Edu</td><td>-0.01</td><td>0.01</td><td>9221</td><td>-1.98</td><td>0.05</td><td>-0.03</td></tr>
+    ## <tr><td>fixed</td><td>DaysMax_p2</td><td>-0.01</td><td>0.00</td><td>20515</td><td>-4.30</td><td>0.00</td><td>-0.33</td></tr>
+    ## <tr><td>fixed</td><td>Age_new1</td><td>0.00</td><td>0.04</td><td>9221</td><td>0.11</td><td>0.91</td><td>0.01</td></tr>
+    ## <tr><td>fixed</td><td>Age_new2</td><td>-0.22</td><td>0.04</td><td>9221</td><td>-5.99</td><td>0.00</td><td>-0.49</td></tr>
+    ## <tr><td>fixed</td><td>Age_new3</td><td>-0.49</td><td>0.04</td><td>9221</td><td>-10.99</td><td>0.00</td><td>-1.08</td></tr>
+    ## <tr><td>fixed</td><td>DaysMax_p2:Age_new1</td><td>0.00</td><td>0.00</td><td>20515</td><td>-1.72</td><td>0.09</td><td>-0.11</td></tr>
+    ## <tr><td>fixed</td><td>DaysMax_p2:Age_new2</td><td>0.00</td><td>0.00</td><td>20515</td><td>-1.17</td><td>0.24</td><td>-0.08</td></tr>
+    ## <tr><td>fixed</td><td>DaysMax_p2:Age_new3</td><td>0.00</td><td>0.00</td><td>20515</td><td>-0.52</td><td>0.60</td><td>-0.04</td></tr>
     ## <tr><td colspan="8" style="border-bottom: 1px solid black"></td></tr></table>
     ## 
     ## <table style="text-align:center"><tr><td colspan="8" style="border-bottom: 1px solid black"></td></tr><tr><td>effect</td><td>term</td><td>estimate</td><td>std.error</td><td>df</td><td>statistic</td><td>p.value</td><td>e_size</td></tr>
-    ## <tr><td colspan="8" style="border-bottom: 1px solid black"></td></tr><tr><td>fixed</td><td>(Intercept)</td><td>2.50</td><td>0.06</td><td>18008</td><td>42.90</td><td>0.00</td><td>5.92738887</td></tr>
-    ## <tr><td>fixed</td><td>Gender1</td><td>0.12</td><td>0.02</td><td>7031</td><td>5.59</td><td>0.00</td><td>0.28471841</td></tr>
-    ## <tr><td>fixed</td><td>Gender3</td><td>0.26</td><td>0.17</td><td>7031</td><td>1.50</td><td>0.13</td><td>0.61238092</td></tr>
-    ## <tr><td>fixed</td><td>Edu</td><td>-0.02</td><td>0.01</td><td>7031</td><td>-2.41</td><td>0.02</td><td>-0.04078033</td></tr>
-    ## <tr><td>fixed</td><td>DaysPhase3</td><td>0.00</td><td>0.00</td><td>18008</td><td>-1.33</td><td>0.18</td><td>-0.08589576</td></tr>
-    ## <tr><td>fixed</td><td>Age_new1</td><td>-0.10</td><td>0.04</td><td>7031</td><td>-2.57</td><td>0.01</td><td>-0.24635792</td></tr>
-    ## <tr><td>fixed</td><td>Age_new2</td><td>-0.32</td><td>0.04</td><td>7031</td><td>-8.12</td><td>0.00</td><td>-0.76625821</td></tr>
-    ## <tr><td>fixed</td><td>Age_new3</td><td>-0.61</td><td>0.05</td><td>7031</td><td>-13.48</td><td>0.00</td><td>-1.45987685</td></tr>
-    ## <tr><td>fixed</td><td>DaysPhase3:Age_new1</td><td>0.00</td><td>0.00</td><td>18008</td><td>-1.43</td><td>0.15</td><td>-0.10679307</td></tr>
-    ## <tr><td>fixed</td><td>DaysPhase3:Age_new2</td><td>0.00</td><td>0.00</td><td>18008</td><td>-2.11</td><td>0.03</td><td>-0.15318034</td></tr>
-    ## <tr><td>fixed</td><td>DaysPhase3:Age_new3</td><td>0.00</td><td>0.00</td><td>18008</td><td>-1.50</td><td>0.13</td><td>-0.12014699</td></tr>
+    ## <tr><td colspan="8" style="border-bottom: 1px solid black"></td></tr><tr><td>fixed</td><td>(Intercept)</td><td>2.50</td><td>0.06</td><td>18008</td><td>42.90</td><td>0.00</td><td>5.93</td></tr>
+    ## <tr><td>fixed</td><td>GenderF</td><td>0.12</td><td>0.02</td><td>7031</td><td>5.59</td><td>0.00</td><td>0.28</td></tr>
+    ## <tr><td>fixed</td><td>GenderO</td><td>0.26</td><td>0.17</td><td>7031</td><td>1.50</td><td>0.13</td><td>0.61</td></tr>
+    ## <tr><td>fixed</td><td>Edu</td><td>-0.02</td><td>0.01</td><td>7031</td><td>-2.41</td><td>0.02</td><td>-0.04</td></tr>
+    ## <tr><td>fixed</td><td>DaysPhase3</td><td>0.00</td><td>0.00</td><td>18008</td><td>-1.33</td><td>0.18</td><td>-0.09</td></tr>
+    ## <tr><td>fixed</td><td>Age_new1</td><td>-0.10</td><td>0.04</td><td>7031</td><td>-2.57</td><td>0.01</td><td>-0.25</td></tr>
+    ## <tr><td>fixed</td><td>Age_new2</td><td>-0.32</td><td>0.04</td><td>7031</td><td>-8.12</td><td>0.00</td><td>-0.77</td></tr>
+    ## <tr><td>fixed</td><td>Age_new3</td><td>-0.61</td><td>0.05</td><td>7031</td><td>-13.48</td><td>0.00</td><td>-1.46</td></tr>
+    ## <tr><td>fixed</td><td>DaysPhase3:Age_new1</td><td>0.00</td><td>0.00</td><td>18008</td><td>-1.43</td><td>0.15</td><td>-0.11</td></tr>
+    ## <tr><td>fixed</td><td>DaysPhase3:Age_new2</td><td>0.00</td><td>0.00</td><td>18008</td><td>-2.11</td><td>0.03</td><td>-0.15</td></tr>
+    ## <tr><td>fixed</td><td>DaysPhase3:Age_new3</td><td>0.00</td><td>0.00</td><td>18008</td><td>-1.50</td><td>0.13</td><td>-0.12</td></tr>
     ## <tr><td colspan="8" style="border-bottom: 1px solid black"></td></tr></table>
 
 ``` r
@@ -958,10 +839,8 @@ intercept.top = TRUE, intercept.bottom = FALSE)
     ## <tr><td style="text-align:left"></td><td colspan="4">NAA</td></tr>
     ## <tr><td style="text-align:left"></td><td>(1)</td><td>(2)</td><td>(3)</td><td>(4)</td></tr>
     ## <tr><td colspan="5" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left">Constant</td><td>2.592<sup>***</sup> (0.096)</td><td>2.507<sup>***</sup> (0.057)</td><td>2.419<sup>***</sup> (0.053)</td><td>2.496<sup>***</sup> (0.058)</td></tr>
-    ## <tr><td style="text-align:left">GenderF</td><td>0.235<sup>***</sup> (0.036)</td><td></td><td></td><td></td></tr>
-    ## <tr><td style="text-align:left">GenderO</td><td>0.234 (0.224)</td><td></td><td></td><td></td></tr>
-    ## <tr><td style="text-align:left">Gender1</td><td></td><td>0.186<sup>***</sup> (0.019)</td><td>0.180<sup>***</sup> (0.019)</td><td>0.120<sup>***</sup> (0.021)</td></tr>
-    ## <tr><td style="text-align:left">Gender3</td><td></td><td>0.468<sup>***</sup> (0.120)</td><td>0.464<sup>***</sup> (0.119)</td><td>0.258 (0.172)</td></tr>
+    ## <tr><td style="text-align:left">GenderF</td><td>0.235<sup>***</sup> (0.036)</td><td>0.186<sup>***</sup> (0.019)</td><td>0.180<sup>***</sup> (0.019)</td><td>0.120<sup>***</sup> (0.021)</td></tr>
+    ## <tr><td style="text-align:left">GenderO</td><td>0.234 (0.224)</td><td>0.468<sup>***</sup> (0.120)</td><td>0.464<sup>***</sup> (0.119)</td><td>0.258 (0.172)</td></tr>
     ## <tr><td style="text-align:left">Edu</td><td>-0.003 (0.013)</td><td>-0.012<sup>**</sup> (0.006)</td><td>-0.012<sup>*</sup> (0.006)</td><td>-0.017<sup>**</sup> (0.007)</td></tr>
     ## <tr><td style="text-align:left">DaysMax_p2</td><td></td><td>-0.005<sup>***</sup> (0.001)</td><td></td><td></td></tr>
     ## <tr><td style="text-align:left">DaysMax_p2_dev</td><td></td><td></td><td>-0.007<sup>***</sup> (0.001)</td><td></td></tr>
